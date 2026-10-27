@@ -122,3 +122,14 @@ Definición de terminado común: criterios probados por QA (tests derivados de e
 
 1. **Dado** el foco en Buscar **cuando** pulso OK **entonces** se abre la búsqueda de Google TV.
 2. **Dado** que la TV no permite abrirla desde nuestra app **cuando** se instala **entonces** el ítem Buscar no aparece.
+## HU-017 — Reloj y accesos rápidos arriba · **Must** *(v0.5, 2026-10-27)*
+**Como** persona de la casa **quiero** ver la hora y tener a mano Wi-Fi, Bluetooth, temporizador y salida de audio **para** no tener que entrar a Ajustes ni a la interfaz de Google TV.
+
+1. **Dado** el launcher abierto (con el panel visible u oculto) **cuando** miro arriba a la derecha **entonces** veo la hora, la fecha y los 4 accesos.
+2. **Dado** el foco en Wi-Fi **cuando** pulso OK **entonces** se abre la pantalla de red; si no hay conexión, el acceso dice "Sin red".
+3. **Dado** el foco en Bluetooth **cuando** pulso OK **entonces** se abre la pantalla para vincular accesorios.
+4. **Dado** el foco en Temporizador **cuando** elijo 30 min **entonces** el acceso muestra los minutos restantes y, al llegar a 0, la TV pasa a reposo.
+5. **Dado** un temporizador activo **cuando** elijo Desactivado **entonces** se cancela y la TV no se apaga.
+6. **Dado** el foco en Audio **cuando** pulso OK **entonces** se abre Pantalla y sonido, donde se elige la salida.
+
+**Casos borde:** si el servicio de accesibilidad está apagado, el temporizador avisa que no puede apagar la TV. Al reiniciar la TV el temporizador se cancela.

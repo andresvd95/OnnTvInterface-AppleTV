@@ -2,6 +2,7 @@
 
 package dev.onn.launcher.ui
 
+import android.os.SystemClock
 import android.provider.Settings
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
@@ -46,6 +47,12 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings as SettingsIcon
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.Bluetooth
+import androidx.compose.material.icons.outlined.Speaker
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.TimerOff
+import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -92,7 +99,9 @@ import androidx.tv.material3.Text
 import dev.onn.launcher.R
 import dev.onn.launcher.domain.AppEntry
 import dev.onn.launcher.domain.LastUsed
+import dev.onn.launcher.domain.SLEEP_OPTIONS_MIN
 import dev.onn.launcher.domain.nextHeroIndex
+import dev.onn.launcher.domain.remainingMinutes
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -115,6 +124,7 @@ fun HomeScreen(vm: HomeViewModel) {
     var cardsHaveFocus by remember { mutableStateOf(false) }
     var heroIndex by remember { mutableIntStateOf(0) }
     var menuFor by remember { mutableStateOf<MenuTarget?>(null) }
+    var timerOpen by remember { mutableStateOf(false) }
     val homeItem = remember { FocusRequester() }
     val firstCard = remember { FocusRequester() }
     val cardsState = rememberLazyListState()
@@ -147,7 +157,9 @@ fun HomeScreen(vm: HomeViewModel) {
     Box(Modifier.fillMaxSize().background(Tokens.Colors.background)) {
         HeroBackground(heroCard?.app, vm, reducedMotion)
 
-        Column(Modifier.fillMaxSize().padding(top = Tokens.Space.safeY * 2, bottom = Tokens.Space.safeY)) {
+        Column(Modifier.fillMaxSize().padding(top = Tokens.Space.safeY, bottom = Tokens.Space.safeY)) {
+            TopBar(state, vm, onTimer = { timerOpen = true }, modifier = Modifier.padding(start = contentStart, end = Tokens.Space.safeX))
+            Spacer(Modifier.height(Tokens.Space.s4))
             HeroInfo(
                 card = heroCard,
                 vm = vm,
@@ -185,6 +197,13 @@ fun HomeScreen(vm: HomeViewModel) {
         }
 
         state.message?.let { MessageToast(it, vm::clearMessage) }
+        if (timerOpen) {
+            TimerDialog(
+                activeMinutesLeft = remainingMinutes(state.sleepEndAt, SystemClock.elapsedRealtime()),
+                onPick = { timerOpen = false; vm.setSleepTimer(it) },
+                onDismiss = { timerOpen = false },
+            )
+        }
         menuFor?.let { target ->
             AppMenu(
                 target = target,
@@ -254,7 +273,7 @@ private fun HeroInfo(card: CardItem?, vm: HomeViewModel, modifier: Modifier, onO
             maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
         if (card != null) Text(lastUsedText(card.lastUsed), fontSize = Tokens.Type.md, color = Tokens.Colors.textMuted)
-        Spacer(Modifier.height(Tokens.Space.s4))
+        Spacer(Modifier.height(Tokens.Space.s3))
         Surface(
             onClick = onOpen,
             shape = ClickableSurfaceDefaults.shape(CircleShape),
@@ -295,7 +314,108 @@ private fun lastUsedText(l: LastUsed): String = when (l) {
     is LastUsed.Days -> stringResource(R.string.last_days, l.n.toInt())
 }
 
-// ---------- Tarjetas (HU-001, HU-010) ----------
+// ---------- Barra superior: accesos rapidos y reloj (HU-017) ----------
+
+@Composable
+private fun TopBar(state: HomeUiState, vm: HomeViewModel, onTimer: () -> Unit, modifier: Modifier) {
+    val wifi = stringResource(R.string.quick_wifi)
+    val bt = stringResource(R.string.quick_bluetooth)
+    val audio = stringResource(R.string.quick_audio)
+    val left = rememberRemainingMinutes(state.sleepEndAt)
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.background(Tokens.Colors.surface, CircleShape).border(1.dp, Tokens.Colors.border, CircleShape).padding(Tokens.Space.s1),
+            horizontalArrangement = Arrangement.spacedBy(Tokens.Space.s1),
+        ) {
+            QuickChip(if (state.online) Icons.Outlined.Wifi else Icons.Outlined.WifiOff, if (state.online) wifi else stringResource(R.string.quick_no_network)) {
+                vm.open(Shortcut.WIFI, wifi)
+            }
+            QuickChip(Icons.Outlined.Bluetooth, bt) { vm.open(Shortcut.BLUETOOTH, bt) }
+            QuickChip(
+                Icons.Outlined.Timer,
+                if (left > 0) stringResource(R.string.quick_timer_left, left) else stringResource(R.string.quick_timer),
+                active = left > 0, onClick = onTimer,
+            )
+            QuickChip(Icons.Outlined.Speaker, audio) { vm.open(Shortcut.AUDIO, audio) }
+        }
+        Spacer(Modifier.width(Tokens.Space.s6))
+        BigClock()
+    }
+}
+
+@Composable
+private fun rememberRemainingMinutes(endAt: Long?): Int {
+    val now by produceState(SystemClock.elapsedRealtime(), endAt) {
+        while (endAt != null) {
+            value = SystemClock.elapsedRealtime()
+            delay(TIMER_TICK_MS)
+        }
+    }
+    return remainingMinutes(endAt, now)
+}
+
+@Composable
+private fun QuickChip(icon: ImageVector, label: String, active: Boolean = false, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.semantics { contentDescription = label },
+        shape = ClickableSurfaceDefaults.shape(CircleShape),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = if (active) Tokens.Colors.primary else Color.Transparent,
+            contentColor = Tokens.Colors.text,
+            focusedContainerColor = Tokens.Colors.focus,
+            focusedContentColor = Tokens.Colors.onFocus,
+        ),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = Tokens.Size.focusScale),
+    ) {
+        Row(Modifier.padding(horizontal = Tokens.Space.s3, vertical = Tokens.Space.s2), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(PANEL_ICON_GLYPH))
+            Spacer(Modifier.width(Tokens.Space.s2))
+            Text(label, fontSize = Tokens.Type.xs, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun BigClock() {
+    val context = LocalContext.current
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            value = System.currentTimeMillis()
+            delay(60_000 - value % 60_000)
+        }
+    }
+    val locale = Locale.getDefault()
+    val time = DateFormat.getBestDateTimePattern(locale, if (DateFormat.is24HourFormat(context)) "Hm" else "hm").replace("a", "").trim()
+    val date = DateFormat.getBestDateTimePattern(locale, "EEEEdMMM")
+    Column(horizontalAlignment = Alignment.End) {
+        Text(SimpleDateFormat(time, locale).format(Date(now)), fontSize = Tokens.Type.xl, fontWeight = FontWeight.Medium, color = Tokens.Colors.text)
+        Text(SimpleDateFormat(date, locale).format(Date(now)), fontSize = Tokens.Type.xs, color = Tokens.Colors.textMuted)
+    }
+}
+
+@Composable
+private fun TimerDialog(activeMinutesLeft: Int, onPick: (Int?) -> Unit, onDismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { first.requestWhenReady() }
+    Dialog(onDismissRequest = onDismiss) {
+        BackHandler(onBack = onDismiss)
+        val shape = RoundedCornerShape(Tokens.Radius.md)
+        Column(
+            Modifier.width(MENU_WIDTH).background(Tokens.Colors.surfaceStrong, shape).border(1.dp, Tokens.Colors.border, shape).padding(Tokens.Space.s2),
+            verticalArrangement = Arrangement.spacedBy(Tokens.Space.s1),
+        ) {
+            Text(stringResource(R.string.timer_title), fontSize = Tokens.Type.md, fontWeight = FontWeight.Medium, color = Tokens.Colors.text, modifier = Modifier.padding(Tokens.Space.s2))
+            MenuItem(Icons.Outlined.TimerOff, stringResource(R.string.timer_off), Modifier.focusRequester(first)) { onPick(null) }
+            SLEEP_OPTIONS_MIN.forEach { m ->
+                MenuItem(Icons.Outlined.Timer, stringResource(R.string.timer_option, m), Modifier) { onPick(m) }
+            }
+            if (activeMinutesLeft > 0) {
+                Text(stringResource(R.string.quick_timer_left, activeMinutesLeft), fontSize = Tokens.Type.xs, color = Tokens.Colors.textMuted, modifier = Modifier.padding(Tokens.Space.s2))
+            }
+        }
+    }
+}
 
 @Composable
 private fun CardsRow(
@@ -556,6 +676,7 @@ private fun MessageToast(text: String, onDone: () -> Unit) {
 
 private const val FOCUS_ATTEMPTS = 20
 private const val FOCUS_RETRY_MS = 50L
+private const val TIMER_TICK_MS = 30_000L
 private val HERO_BLUR = 40.dp
 private val DOT = 6.dp
 private val DOT_ACTIVE_W = 16.dp

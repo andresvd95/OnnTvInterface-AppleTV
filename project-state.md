@@ -86,3 +86,4 @@
 - 2026-10-26 QA en TV aprobada por el usuario. Seguridad aprobada (sin INTERNET). Documentación: README, runbook, CHANGELOG 0.1.0, scripts de operación. Condiciones de viabilidad 1–5 ✔. Siguiente: commit + release v0.1.0.
 - 2026-10-26 MVP v0.1.0 subido: PR andresvd95/OnnTvInterface#1 (feature/mvp-launcher → main), abierto.
 - 2026-10-26 Nueva tarea → **FEATURE**: rediseño con distribución tipo app Apple TV (panel lateral que se oculta, portada de la app con foco con carrusel, tarjetas con título). Rama feature/ui-apple-tv (desde feature/mvp-launcher). Spec UX v0.2 + PRD v0.4 (HU-014..016) esperando aprobación.
+- 2026-10-27 Rediseño Apple TV construido (panel lateral, portada, tarjetas) + HU-017 barra superior (reloj, Wi-Fi, Bluetooth, temporizador propio, audio). 27/27 pruebas. Instalado en TV Santiago; panel y portada verificados con capturas; barra superior pendiente de captura (TV en reposo). Lección: force-stop desactiva el servicio de accesibilidad (runbook).

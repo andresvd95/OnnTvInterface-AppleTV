@@ -47,6 +47,14 @@ class HomeInterceptorService : AccessibilityService() {
 
     fun openNotifications(): Boolean = performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
 
+    /** Temporizador (HU-017): pone la TV en reposo. Si la accion global no esta disponible, usa la accion de reposo de Ajustes. */
+    fun sleepNow() {
+        if (performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)) return
+        runCatching {
+            startActivity(Intent(PANO_SLEEP).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
+
     private fun intercept() {
         HomeSignals.lastInterceptMs = SystemClock.uptimeMillis()
         bringLauncherToFront()
@@ -71,6 +79,7 @@ class HomeInterceptorService : AccessibilityService() {
     }
 
     companion object {
+        private const val PANO_SLEEP = "com.google.android.pano.action.SLEEP"
         const val STOCK_HOME_ACTIVITY = "com.google.android.apps.tv.launcherx.home.HomeActivity"
         private const val KEY_WINDOW_MS = 300L
         private const val RETRY_DELAY_MS = 500L
