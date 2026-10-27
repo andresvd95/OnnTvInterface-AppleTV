@@ -68,3 +68,19 @@ Foco inicial al abrir: **Inicio** en el panel (como Apple TV).
 ## Notas para construcción
 - Desenfoque de la portada: bitmap reducido y ampliado (o RenderEffect en API 31+), calculado una vez por app y en caché (Performance).
 - Buscar (HU-016) depende de que el intent de búsqueda de Google TV abra desde nuestra app: se verifica al construir; si no abre, el ítem se oculta.
+
+---
+## v0.3 — Barra superior: reloj y accesos rápidos (HU-017) · 2026-10-27
+Pedido del usuario: arriba, un reloj y accesos rápidos a Wi-Fi, Bluetooth, temporizador y salida de audio (como el panel de Google TV).
+
+- **Ubicación:** arriba a la derecha del área de contenido, siempre visible (también con el panel oculto).
+- **Contenido (izquierda → derecha):** cápsula de vidrio con 4 accesos tipo píldora (icono + texto corto) y, a la derecha, el **reloj** (hora `xl`, fecha `xs` debajo).
+- **Accesos** (verificados en TV Santiago):
+  | Acceso | Texto | Acción |
+  |---|---|---|
+  | Wi-Fi | "Wi-Fi" / "Sin red" | Abre Ajustes → Red (`NetworkActivity`) |
+  | Bluetooth | "Bluetooth" | Abre Agregar accesorio (`AddAccessoryActivity`); si no abre, Ajustes. El interruptor de Bluetooth de Google TV no es accesible a otras apps |
+  | Temporizador | "Temporizador" / "Quedan 25 min" | Menú propio: Desactivado, 15, 30, 60, 90, 120 min. Al terminar, el servicio de accesibilidad pone la TV en reposo |
+  | Salida de audio | "Audio" | Abre Ajustes → Pantalla y sonido (`DisplaySoundActivity`); el selector rápido de Google TV no es accesible |
+- **Navegación:** ↑ desde Abrir llega a la barra; ←/→ entre accesos; ↓ vuelve a Abrir.
+- **Estados:** temporizador activo resalta la píldora y muestra los minutos restantes; error al abrir → aviso de 3 s.
