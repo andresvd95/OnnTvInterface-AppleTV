@@ -3,12 +3,18 @@ package dev.onn.launcher.system
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.app.SearchManager
 import android.provider.Settings
 
 /** Accesos de la barra superior (HU-004, HU-011, HU-012, HU-013). Devuelven false si no se pudo abrir. */
 class SystemShortcuts(private val context: Context) {
 
     fun openSettings(): Boolean = start(Intent(Settings.ACTION_SETTINGS))
+
+    /** Busqueda de Google TV (HU-016). Si nadie la atiende, el item Buscar no se muestra. */
+    fun canSearch(): Boolean = context.packageManager.resolveActivity(Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH), 0) != null
+
+    fun openSearch(): Boolean = start(Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH))
 
     fun openPlay(): Boolean {
         val pm = context.packageManager
