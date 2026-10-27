@@ -21,7 +21,7 @@ object Tokens {
         val danger = Color(0xFFFF6B5A)
     }
     object Type {
-        val xs = 12.sp; val sm = 14.sp; val md = 16.sp; val lg = 20.sp; val xl = 28.sp; val x3l = 48.sp
+        val xs = 12.sp; val sm = 14.sp; val md = 16.sp; val lg = 20.sp; val xl = 28.sp; val x2l = 36.sp; val x3l = 48.sp
     }
     object Space {
         val s1 = 4.dp; val s2 = 8.dp; val s3 = 12.dp; val s4 = 16.dp; val s6 = 24.dp; val s8 = 32.dp
@@ -34,6 +34,8 @@ object Tokens {
         val iconButton = 40.dp
         val focusRing = 2.dp
         const val focusScale = 1.1f
+        val panelW = 220.dp
+        val heroBannerW = 192.dp; val heroBannerH = 108.dp
     }
-    object Motion { const val fastMs = 120; const val messageMs = 3_000L }
+    object Motion { const val fastMs = 120; const val baseMs = 200; const val slowMs = 320; const val messageMs = 3_000L; const val carouselMs = 8_000L }
 }

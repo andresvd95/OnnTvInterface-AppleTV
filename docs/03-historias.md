@@ -9,9 +9,9 @@ Definición de terminado común: criterios probados por QA (tests derivados de e
 ## HU-001 — Apps arriba al iniciar, sin recomendaciones encima · **Must**
 **Como** persona de la casa **quiero** ver mis apps arriba apenas aparece la pantalla de inicio **para** abrir lo que quiero sin distracciones.
 
-1. **Dado** que el launcher está abierto **cuando** se muestra la pantalla **entonces** la primera sección, en la parte superior, es la fila de apps.
+1. **Dado** que el launcher está abierto **cuando** se muestra la pantalla **entonces** solo se muestran apps (portada de la app con foco, tarjetas y Mis apps): ningún contenido de terceros. *(v0.4: la distribución pasa a la de la app Apple TV; ver HU-014/015.)*
 2. **Dado** cualquier estado **cuando** se muestra la pantalla **entonces** no aparece ninguna recomendación, póster, anuncio ni fila de contenido por encima de la fila de apps.
-3. **Dado** que se abre el launcher **cuando** termina de cargar **entonces** el foco está en la primera app de la fila superior.
+3. **Dado** que se abre el launcher **cuando** termina de cargar **entonces** el foco está en **Inicio** del panel lateral, y con → pasa a la primera tarjeta.
 
 **Casos borde:** app sin banner de TV → ícono con el mismo tamaño y estilo. Más apps de las que caben → la fila desplaza horizontalmente.
 
@@ -98,3 +98,27 @@ Definición de terminado común: criterios probados por QA (tests derivados de e
 
 1. **Dado** el launcher abierto **cuando** voy al acceso de notificaciones y pulso OK **entonces** se abre el panel de notificaciones de Google TV.
 2. **Dado** notificaciones pendientes **cuando** se muestra la pantalla **entonces** el acceso muestra un indicador discreto. *(Supuesto; depende de lo que el sistema permita leer.)*
+
+## HU-014 — Portada de la app con foco · **Must**
+**Como** persona de la casa **quiero** ver en grande la app que estoy seleccionando **para** que la pantalla se sienta viva y clara, como en Apple TV, sin recomendaciones ajenas.
+
+1. **Dado** el foco en una tarjeta **cuando** cambia el foco **entonces** la portada muestra esa app: fondo a pantalla completa con su arte desenfocado, su banner, su nombre y cuándo se usó por última vez.
+2. **Dado** la portada visible **cuando** pulso ↑ y luego OK en **Abrir** **entonces** se abre la app de la portada.
+3. **Dado** que nadie navega durante 8 s **cuando** hay Recientes **entonces** la portada rota entre ellas (máx. 5) con indicadores de puntos; al navegar, se detiene.
+4. **Dado** "Quitar animaciones" activo **cuando** se muestra la portada **entonces** no rota sola.
+
+**Casos borde:** app sin uso registrado → subtítulo "Nueva". App sin banner → ícono sobre su color.
+
+## HU-015 — Panel lateral de vidrio · **Must**
+**Como** persona de la casa **quiero** un panel a la izquierda con mi perfil, la hora, la navegación y mis apps **para** tener todo a mano sin ensuciar la pantalla.
+
+1. **Dado** que abro el launcher **cuando** se muestra **entonces** el panel está visible con: perfil y hora, Buscar, Inicio, Notificaciones, Google Play, Ajustes y la sección "Mis apps" (favoritas en su orden).
+2. **Dado** el foco en el panel **cuando** pulso → **entonces** el panel se oculta y el foco pasa a la primera tarjeta.
+3. **Dado** el panel oculto **cuando** pulso ← en la primera tarjeta o Atrás **entonces** el panel vuelve.
+4. **Dado** el foco en una app de "Mis apps" **cuando** pulso OK **entonces** se abre esa app.
+
+## HU-016 — Buscar · **Could** *(sujeto a verificación en la TV)*
+**Como** persona de la casa **quiero** un acceso a Buscar en el panel **para** buscar contenido con la búsqueda de Google TV.
+
+1. **Dado** el foco en Buscar **cuando** pulso OK **entonces** se abre la búsqueda de Google TV.
+2. **Dado** que la TV no permite abrirla desde nuestra app **cuando** se instala **entonces** el ítem Buscar no aparece.
