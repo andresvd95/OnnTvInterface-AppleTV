@@ -20,9 +20,9 @@ La interfaz toma como referencia la distribución limpia de Apple TV: panel late
 
 ## Interfaz
 
-Al iniciar se muestra un panel lateral con el perfil, la hora y los accesos del sistema. Al pasar a las tarjetas, el panel se oculta para dar protagonismo a la portada.
+Al iniciar se muestra un panel lateral con el perfil y los accesos del sistema, y arriba una barra con el reloj y accesos rápidos. Al pasar a las tarjetas, el panel se oculta para dar protagonismo a la portada.
 
-![Inicio con panel lateral y YouTube seleccionado](docs/media/home-panel-youtube.jpg)
+![Inicio con panel lateral, barra superior con accesos rápidos y reloj](docs/media/home-barra-superior.jpg)
 
 La portada cambia con el foco y muestra el estado de uso de cada aplicación.
 
@@ -31,6 +31,16 @@ La portada cambia con el foco y muestra el estado de uso de cada aplicación.
 La navegación se realiza por completo con D-pad, OK, Atrás y Home. El foco se indica mediante escala y un anillo visible.
 
 ![Portada de Disney Plus con tarjeta enfocada](docs/media/home-disney-plus.jpg)
+
+### Reloj y accesos rápidos
+
+Arriba a la derecha, siempre visibles: reloj con fecha y accesos a **Wi-Fi**, **Bluetooth**, **Temporizador** y **Audio**, como los del panel de Google TV.
+
+![Barra superior con el temporizador enfocado](docs/media/barra-temporizador-foco.jpg)
+
+El temporizador pone la TV en reposo después de 15, 30, 60, 90 o 120 minutos y muestra el tiempo restante en la barra.
+
+![Menú del temporizador](docs/media/temporizador-menu.jpg)
 
 ## Funcionalidades
 
@@ -41,6 +51,7 @@ La navegación se realiza por completo con D-pad, OK, Atrás y Home. El foco se 
 - Accesos a las funciones nativas de Google TV: perfiles, notificaciones, Play Store y ajustes.
 - El botón Home se intercepta mediante un servicio de accesibilidad sin desactivar Google TV.
 - Respeta la opción del sistema para reducir animaciones.
+- Barra superior con reloj y accesos rápidos a Wi-Fi, Bluetooth, temporizador de apagado y salida de audio.
 
 ## Tecnología
 
