@@ -2,7 +2,7 @@
 
 > Dueño: `requirements-analyst` · Aprobación: usuario (modo semiautomático)
 
-**Versión:** 0.4 · **Fecha:** 2026-10-26 · **Estado:** borrador (v0.4: distribución tipo app Apple TV — panel lateral, portada de la app con foco, tarjetas con título; HU-014..016)
+**Versión:** 0.5 · **Fecha:** 2026-10-26 · **Estado:** borrador (v0.5: + HU-017 reloj y accesos rápidos; v0.4: distribución tipo app Apple TV — panel lateral, portada de la app con foco, tarjetas con título; HU-014..016)
 
 ## 1. Problema y objetivo
 - **Problema:** la interfaz de Google TV en TV Santiago llena la pantalla de recomendaciones y contenido que nadie pidió, y las apps quedan en segundo plano.
@@ -35,6 +35,7 @@
 | Must | HU-014 — Portada grande de la app con foco, con carrusel de Recientes |
 | Must | HU-015 — Panel lateral de vidrio (perfil, navegación, Mis apps) que se oculta al entrar al contenido |
 | Could | HU-016 — Buscar (abre la búsqueda de Google TV; sujeto a verificación) |
+| Must | HU-017 — Reloj y accesos rápidos arriba: Wi-Fi, Bluetooth, temporizador, salida de audio |
 | Must | HU-010 — Fila de **Recientes** (apps usadas últimamente) **debajo** de la fila de apps *(reemplaza a las recomendaciones de contenido: la PoC demostró que Android no deja leer las de otras apps; decisión del usuario 2026-10-26)* |
 | Must | HU-011 — Acceso a Google Play (tienda) |
 | Must | HU-012 — Perfiles de Google TV |
