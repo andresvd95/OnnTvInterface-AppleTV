@@ -27,3 +27,6 @@ powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
 - Nunca se desinstala ni deshabilita ningún paquete del sistema.
 - Netflix (`com.netflix.ninja`) ya estaba deshabilitado antes del proyecto: la restauración lo deja así.
 - Después de instalar, se recomienda **apagar la depuración inalámbrica** en la TV (TDD §8).
+
+## Advertencia: no forzar el cierre
+`adb shell am force-stop dev.onn.launcher` (o "Forzar detención" en Ajustes) **desactiva el servicio de accesibilidad**: Android lo quita de la lista de servicios activos y el botón Inicio vuelve a abrir Google TV. Si pasa, ejecutar `reaplicar.ps1`. (Visto en TV Santiago, 2026-10-27.)

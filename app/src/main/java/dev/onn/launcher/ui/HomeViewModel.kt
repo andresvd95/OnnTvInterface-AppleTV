@@ -1,6 +1,8 @@
 package dev.onn.launcher.ui
 
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -20,6 +22,7 @@ import dev.onn.launcher.domain.moveFavorite
 import dev.onn.launcher.domain.orderApps
 import dev.onn.launcher.domain.selectRecents
 import dev.onn.launcher.domain.toggleFavorite
+import dev.onn.launcher.system.SleepTimer
 import dev.onn.launcher.system.SystemShortcuts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,10 +50,14 @@ data class HomeUiState(
     val moving: String? = null,
     val message: String? = null,
     val canSearch: Boolean = false,
+    val online: Boolean = true,
+    val sleepEndAt: Long? = null,
     val loaded: Boolean = false,
 )
 
-enum class Shortcut { SEARCH, NOTIFICATIONS, PLAY, SETTINGS, PROFILE }
+enum class Shortcut { SEARCH, NOTIFICATIONS, PLAY, SETTINGS, PROFILE, WIFI, BLUETOOTH, AUDIO }
+
+private data class Extras(val moving: String?, val message: String?, val online: Boolean, val sleepEndAt: Long?)
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
@@ -65,10 +72,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val usage = MutableStateFlow<List<UsageRecord>>(emptyList())
     private val moving = MutableStateFlow<String?>(null)
     private val message = MutableStateFlow<String?>(null)
+    private val online = MutableStateFlow(true)
+    private val extras = combine(moving, message, online, SleepTimer.endAt, ::Extras)
 
     val state: StateFlow<HomeUiState> = combine(
-        installed, prefs.favorites, prefs.hidden, usage, combine(moving, message, ::Pair),
-    ) { all, favorites, hidden, usageList, (mov, msg) ->
+        installed, prefs.favorites, prefs.hidden, usage, extras,
+    ) { all, favorites, hidden, usageList, ex ->
         val visibleHidden = hidden + SYSTEM_SETTINGS
         val apps = orderApps(all, favorites, visibleHidden, selfPackage)
         val byPackage = all.associateBy { it.packageName }
@@ -81,15 +90,35 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             pinned = apps.filter { it.packageName in favorites },
             hero = heroCandidates(recents),
             favorites = favorites,
-            moving = mov,
-            message = msg,
+            moving = ex.moving,
+            message = ex.message,
+            online = ex.online,
+            sleepEndAt = ex.sleepEndAt,
             canSearch = shortcuts.canSearch(),
             loaded = true,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
+    /** Al volver al launcher: Recientes y estado de red (HU-010, HU-017). */
     fun refreshRecents() {
         viewModelScope.launch { usage.value = withContext(Dispatchers.IO) { recentsRepo.usage() } }
+        online.value = isOnline()
+    }
+
+    private fun isOnline(): Boolean {
+        val cm = getApplication<Application>().getSystemService(ConnectivityManager::class.java)
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    /** Temporizador (HU-017): null desactiva. */
+    fun setSleepTimer(minutes: Int?) {
+        val app = getApplication<Application>()
+        message.value = when {
+            minutes == null -> { SleepTimer.cancel(); app.getString(R.string.timer_cancelled) }
+            SleepTimer.start(minutes) -> app.getString(R.string.timer_set, minutes)
+            else -> app.getString(R.string.timer_no_service)
+        }
     }
 
     /** Arte de la app, convertido una sola vez y guardado en memoria (rendimiento). */
@@ -112,6 +141,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             Shortcut.PLAY -> shortcuts.openPlay()
             Shortcut.SETTINGS -> shortcuts.openSettings()
             Shortcut.PROFILE -> shortcuts.openProfiles()
+            Shortcut.WIFI -> shortcuts.openWifi()
+            Shortcut.BLUETOOTH -> shortcuts.openBluetooth()
+            Shortcut.AUDIO -> shortcuts.openAudioOutput()
         }
         if (!ok) showError(label)
     }
