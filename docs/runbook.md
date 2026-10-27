@@ -30,3 +30,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
 
 ## Advertencia: no forzar el cierre
 `adb shell am force-stop dev.onn.launcher` (o "Forzar detención" en Ajustes) **desactiva el servicio de accesibilidad**: Android lo quita de la lista de servicios activos y el botón Inicio vuelve a abrir Google TV. Si pasa, ejecutar `reaplicar.ps1`. (Visto en TV Santiago, 2026-10-27.)
+
+## Firma de release y publicación del APK
+1. **Una sola vez:** `powershell -ExecutionPolicy Bypass -File .\scripts\crear-clave-release.ps1`. Crea la clave en `%USERPROFILE%\.onn-keys\onn-launcher-release.jks` y `keystore.properties` (ignorado por git). Contraseña solo ASCII. **Respalda la clave y la contraseña**: sin ellas la TV no acepta actualizaciones sin desinstalar.
+2. Compilar `assembleRelease` (ver notas de build en docs/07-revision-construccion.md). Resultado: `app/build/outputs/apk/release/app-release.apk` (~1,6 MB, con R8).
+3. **Primera vez en la TV:** el APK de depuración y el de release tienen firmas distintas; hay que desinstalar el de depuración (se pierden favoritas y ocultas) y luego `instalar.ps1 -Apk <ruta del release>`.
+4. Publicar: GitHub Release con la etiqueta de la versión y el APK adjunto.

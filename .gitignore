@@ -9,3 +9,4 @@ poc/app/build/
 poc/.gradle/
 app/build/
 *.apk
+keystore.properties
