@@ -1,8 +1,22 @@
-# ONN Launcher
+<div align="center">
 
-Launcher doméstico para el onn. 4K Streaming Box **TV Santiago** (Google TV / Android 14). Sustituye las recomendaciones y anuncios de la pantalla de inicio por una vista limpia, pensada para usar a tres metros con el control remoto.
+# 📺 ONN Launcher
 
-La interfaz toma como referencia la distribución de una app de TV moderna: panel lateral translúcido, portada de la aplicación seleccionada y una fila de tarjetas. No utiliza recursos, marca ni tipografías de terceros.
+### Un launcher limpio para Google TV, diseñado para usar desde el sofá.
+
+Interfaz doméstica para el onn. 4K Streaming Box **TV Santiago**. Reemplaza las recomendaciones y anuncios por las aplicaciones que realmente se usan, con una navegación clara mediante control remoto.
+
+![Versión](https://img.shields.io/badge/versión-v1.0.0-2563EB?style=flat-square)
+![Estado](https://img.shields.io/badge/estado-estable-16A34A?style=flat-square)
+![Plataforma](https://img.shields.io/badge/plataforma-Android_TV%20%7C%20Google_TV-3DDC84?style=flat-square)
+![Stack](https://img.shields.io/badge/stack-Kotlin%20%2B%20Compose_for_TV-7F52FF?style=flat-square)
+![Privacidad](https://img.shields.io/badge/privacidad-sin_Internet-0F766E?style=flat-square)
+
+[Interfaz](#interfaz) · [Funcionalidades](#funcionalidades) · [Tecnología](#tecnología) · [Uso](#uso) · [Compilación](#compilación) · [Documentación](#documentación)
+
+</div>
+
+La interfaz toma como referencia la distribución limpia de Apple TV: panel lateral translúcido, portada de la aplicación seleccionada y una fila de tarjetas. No utiliza recursos, marca ni tipografías de Apple.
 
 ## Interfaz
 
@@ -61,4 +75,4 @@ El proyecto se compila con Gradle. En Windows, la ruta de este repositorio conti
 
 ## Estado
 
-La aplicación se encuentra en la versión **0.1.0**; la interfaz v0.2 está en desarrollo. La validación de navegación, accesos del sistema, rendimiento e intercepción real del botón Home debe completarse en el dispositivo objetivo.
+Versión actual: **1.0.0**. La navegación, los accesos del sistema, el rendimiento y la intercepción real del botón Home se validan en el dispositivo objetivo.
