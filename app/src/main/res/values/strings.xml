@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">ONN Launcher</string>
+    <string name="a11y_label">ONN Launcher — botón Inicio</string>
+    <string name="a11y_description">Hace que el botón Inicio del control abra ONN Launcher y permite abrir el panel de notificaciones. No lee el contenido de la pantalla.</string>
+    <string name="section_apps">Apps</string>
+    <string name="section_recents">Recientes</string>
+    <string name="action_notifications">Notificaciones</string>
+    <string name="action_play">Google Play</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_profile">Perfil</string>
+    <string name="menu_move">Mover</string>
+    <string name="menu_pin">Fijar arriba</string>
+    <string name="menu_unpin">Quitar de arriba</string>
+    <string name="menu_hide">Ocultar</string>
+    <string name="menu_move_hint">Usa ← → para mover y OK para terminar</string>
+    <string name="empty_apps">Instala apps desde Google Play</string>
+    <string name="error_open">No se pudo abrir %1$s. Intenta de nuevo.</string>
+</resources>

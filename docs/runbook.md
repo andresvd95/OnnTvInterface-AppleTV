@@ -1,0 +1,29 @@
+# Runbook — ONN LAUNCHER en TV Santiago
+
+Requisitos: PC en la misma red, ADB en `%LOCALAPPDATA%\Android\platform-tools`, y en la TV **Opciones de desarrollador → Depuración inalámbrica** activada y vinculada con este PC (ver docs/06-poc-informe.md). Los scripts buscan solos el puerto de la TV.
+
+Ejecutar desde PowerShell en la carpeta del proyecto (Windows bloquea scripts no firmados por defecto; esta forma lo permite solo para ese script):
+
+```
+powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
+```
+
+| Situación | Script | Qué hace |
+|---|---|---|
+| Antes de cualquier cambio | `respaldo.ps1` | Guarda paquetes, ajustes e inicio por defecto en `backups/tv-santiago/<fecha>/`. Solo lectura. |
+| Instalar o actualizar | `instalar.ps1` | Instala el APK, concede estadísticas de uso, activa el servicio del botón Inicio y abre el launcher. |
+| Tras una actualización de Google TV (vuelve a salir Google TV) | `reaplicar.ps1` | Reactiva el servicio y el permiso. |
+| **RESCATE** / volver al original | `restaurar.ps1` | Quita nuestro servicio de accesibilidad (respeta otros), desinstala ONN Launcher y verifica que Google TV es el inicio. |
+
+## Rescate sin PC (desde la TV)
+1. **Ajustes → Sistema → Accesibilidad** → desactivar **ONN Launcher — botón Inicio**. Con eso Home vuelve a abrir Google TV.
+2. Opcional: **Ajustes → Apps → ONN Launcher → Desinstalar**.
+
+## Verificado
+- Los comandos de `restaurar.ps1` son los mismos de la prueba de restauración del 2026-10-26: TV idéntica al respaldo (0 diferencias de paquetes).
+- Los scripts se validaron en sintaxis; la primera ejecución real conviene hacerla con el usuario presente.
+
+## Importante
+- Nunca se desinstala ni deshabilita ningún paquete del sistema.
+- Netflix (`com.netflix.ninja`) ya estaba deshabilitado antes del proyecto: la restauración lo deja así.
+- Después de instalar, se recomienda **apagar la depuración inalámbrica** en la TV (TDD §8).
