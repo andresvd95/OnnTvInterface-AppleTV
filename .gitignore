@@ -1,0 +1,11 @@
+﻿backups/
+*.jks
+*.keystore
+local.properties
+.gradle/
+build/
+.idea/
+poc/app/build/
+poc/.gradle/
+app/build/
+*.apk
