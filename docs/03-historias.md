@@ -41,9 +41,9 @@ Definición de terminado común: criterios probados por QA (tests derivados de e
 2. **Dado** que estoy en Ajustes **cuando** pulso Atrás o Home **entonces** vuelvo al launcher.
 
 ## HU-005 — Respaldo y restauración · **Must**
-**Como** dueño **quiero** respaldar TV Santiago antes de instalar nada y poder volver al original con un comando **para** no perder nunca el estado de fábrica.
+**Como** dueño **quiero** respaldar la TV antes de instalar nada y poder volver al original con un comando **para** no perder nunca el estado de fábrica.
 
-1. **Dado** TV Santiago conectada por ADB **cuando** ejecuto el respaldo **entonces** queda guardada en `backups/tv-santiago/AAAA-MM-DD/`: la lista completa de paquetes (habilitados y deshabilitados), el launcher por defecto, la versión de Android/build y los ajustes clave.
+1. **Dado** La TV conectada por ADB **cuando** ejecuto el respaldo **entonces** queda guardada en `backups/tv/AAAA-MM-DD/`: la lista completa de paquetes (habilitados y deshabilitados), el launcher por defecto, la versión de Android/build y los ajustes clave.
 2. **Dado** el launcher propio fijado **cuando** ejecuto el comando de restauración **entonces** Google TV vuelve a ser la pantalla de inicio y nuestro launcher se desinstala.
 3. **Dado** cualquier momento **cuando** reviso los cambios hechos en la TV **entonces** ninguno es un `uninstall` de paquetes del sistema.
 

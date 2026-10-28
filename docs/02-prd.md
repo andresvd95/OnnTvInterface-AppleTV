@@ -5,19 +5,19 @@
 **Versión:** 0.5 · **Fecha:** 2026-10-26 · **Estado:** borrador (v0.5: + HU-017 reloj y accesos rápidos; v0.4: distribución tipo app Apple TV — panel lateral, portada de la app con foco, tarjetas con título; HU-014..016)
 
 ## 1. Problema y objetivo
-- **Problema:** la interfaz de Google TV en TV Santiago llena la pantalla de recomendaciones y contenido que nadie pidió, y las apps quedan en segundo plano.
+- **Problema:** la interfaz de Google TV en la TV llena la pantalla de recomendaciones y contenido que nadie pidió, y las apps quedan en segundo plano.
 - **Objetivo:** una pantalla de inicio **muy limpia** donde lo primero, arriba, sean las apps, sin recomendaciones encima; las recomendaciones van debajo. La diagramación toma como referencia el lenguaje actual de Apple en iPhone: mucho aire, jerarquía clara, capas translúcidas y esquinas redondeadas. Se toma **solo la diagramación**: ni íconos, ni marca, ni nada más de Apple. *(Palabras del usuario; la interpretación del estilo es del Orquestador y la concreta UX/UI.)*
 - **Métricas de éxito:**
   | Métrica | Objetivo | Cómo se mide |
   |---|---|---|
   | Clics para abrir una app favorita desde Home | ≤ 2 (navegar + OK) | Prueba manual con control remoto |
-  | Tiempo de Home a pantalla visible | < 1,5 s *(supuesto)* | Medición en TV Santiago |
+  | Tiempo de Home a pantalla visible | < 1,5 s *(supuesto)* | Medición en la TV |
   | Contenido por encima de la fila de apps | 0 | Inspección visual |
 
 ## 2. Usuarios y actores
 | Actor | Descripción | Necesidad principal |
 |---|---|---|
-| Persona de la casa | Usa TV Santiago con el control remoto | Encender y abrir su app rápido, sin distracciones |
+| Persona de la casa | Usa la TV con el control remoto | Encender y abrir su app rápido, sin distracciones |
 | Dueño / administrador | El usuario; instala y mantiene desde el PC | Instalar, configurar y poder restaurar el original en cualquier momento |
 
 ## 3. Alcance (MoSCoW)
@@ -45,7 +45,7 @@
 ## 4. Fuera de alcance
 - Recomendaciones **encima** o mezcladas con la fila de apps: las apps siempre van primero, arriba.
 - Íconos, marca, tipografía propietaria o cualquier recurso de Apple: solo se toma la diagramación.
-- **TV VD:** el proyecto es solo para TV Santiago.
+- **TV VD:** el proyecto es solo para la TV.
 - Publicar el launcher en Play Store o distribuirlo a terceros.
 - Perfiles y notificaciones propios: se usan los de Google TV.
 - Reemplazar Ajustes, búsqueda o el asistente de Google: se abren los del sistema.

@@ -11,7 +11,7 @@ class SystemShortcuts(private val context: Context) {
 
     fun openSettings(): Boolean = start(Intent(Settings.ACTION_SETTINGS))
 
-    // Accesos rapidos (HU-017), verificados en TV Santiago.
+    // Accesos rapidos (HU-017), verificados en la TV.
     fun openWifi(): Boolean = start(Intent(Settings.ACTION_WIFI_SETTINGS))
 
     /** No hay pantalla de Bluetooth abrible por otras apps: se abre Agregar accesorio; si falla, Ajustes. */

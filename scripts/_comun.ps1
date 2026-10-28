@@ -11,11 +11,11 @@ function Connect-Tv {
     $serial = & $Script:Adb devices | Select-String "$([regex]::Escape($Script:TvIp)):\d+\s+device" | ForEach-Object { ($_ -split "\s+")[0] } | Select-Object -First 1
     if (-not $serial) {
         $svc = & $Script:Adb mdns services | Select-String "_adb-tls-connect.*$([regex]::Escape($Script:TvIp)):(\d+)"
-        if (-not $svc) { throw "TV Santiago no anuncia depuración inalámbrica. Actívala en Opciones de desarrollador." }
+        if (-not $svc) { throw "La TV no anuncia depuración inalámbrica. Actívala en Opciones de desarrollador." }
         & $Script:Adb connect "$($Script:TvIp):$($svc.Matches[0].Groups[1].Value)" | Out-Null
         $serial = & $Script:Adb devices | Select-String "$([regex]::Escape($Script:TvIp)):\d+\s+device" | ForEach-Object { ($_ -split "\s+")[0] } | Select-Object -First 1
     }
-    if (-not $serial) { throw "No se pudo conectar a TV Santiago." }
+    if (-not $serial) { throw "No se pudo conectar a la TV." }
     Write-Host "Conectado a $serial"
     return $serial
 }
