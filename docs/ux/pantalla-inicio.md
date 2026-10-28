@@ -75,7 +75,7 @@ Pedido del usuario: arriba, un reloj y accesos rápidos a Wi-Fi, Bluetooth, temp
 
 - **Ubicación:** arriba a la derecha del área de contenido, siempre visible (también con el panel oculto).
 - **Contenido (izquierda → derecha):** cápsula de vidrio con 4 accesos tipo píldora (icono + texto corto) y, a la derecha, el **reloj** (hora `xl`, fecha `xs` debajo).
-- **Accesos** (verificados en TV Santiago):
+- **Accesos** (verificados en la TV):
   | Acceso | Texto | Acción |
   |---|---|---|
   | Wi-Fi | "Wi-Fi" / "Sin red" | Abre Ajustes → Red (`NetworkActivity`) |

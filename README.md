@@ -4,7 +4,7 @@
 
 ### Un launcher limpio para Google TV, diseñado para usar desde el sofá.
 
-Interfaz doméstica para el onn. 4K Streaming Box **TV Santiago**. Reemplaza las recomendaciones y anuncios por las aplicaciones que realmente se usan, con una navegación clara mediante control remoto.
+Interfaz doméstica para el onn. 4K Streaming Box. Reemplaza las recomendaciones y anuncios por las aplicaciones que realmente se usan, con una navegación clara mediante control remoto.
 
 ![Versión](https://img.shields.io/badge/versión-v1.0.0-2563EB?style=flat-square)
 ![Estado](https://img.shields.io/badge/estado-estable-16A34A?style=flat-square)

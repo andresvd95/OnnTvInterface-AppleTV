@@ -5,7 +5,7 @@
 ## Dictamen: ✅ VIABLE CON CONDICIONES
 
 ## Qué se evalúa
-Construir una interfaz de inicio (launcher) propia para el onn. 4K Streaming Box "TV Santiago" (Google TV), instalada por ADB, sin publicarla en Play Store, como MVP rápido y con restauración garantizada del estado original.
+Construir una interfaz de inicio (launcher) propia para el onn. 4K Streaming Box (Google TV), instalada por ADB, sin publicarla en Play Store, como MVP rápido y con restauración garantizada del estado original.
 
 ## Argumentos a favor
 - Android TV permite oficialmente que cualquier app actúe como pantalla de inicio: basta con declarar la categoría `HOME` (y `LEANBACK_LAUNCHER`) en la app. No hace falta root.
@@ -23,7 +23,7 @@ Construir una interfaz de inicio (launcher) propia para el onn. 4K Streaming Box
 | 5 | La depuración inalámbrica de Android 11+ requiere emparejamiento y puede apagarse al reiniciar | Bajo: incomodidad | Alta | Documentar el emparejamiento; el launcher no depende de ADB para funcionar |
 
 ## Supuestos (no verificados aún)
-- TV Santiago corre Google TV sobre Android 12 o superior. Se verifica con ADB en el respaldo.
+- La TV corre Google TV sobre Android 12 o superior. Se verifica con ADB en el respaldo.
 - El paquete del launcher de stock es `com.google.android.apps.tv.launcherx`. Se verifica con ADB.
 - La familia usa la TV sobre todo para abrir apps de streaming.
 
@@ -37,8 +37,8 @@ Construir una interfaz de inicio (launcher) propia para el onn. 4K Streaming Box
 Recomendación del analista: construir propio, como pidió el usuario. La base y el stack los decide el Arquitecto con la regla de 3 opciones, y una de ellas puede ser partir de código abierto.
 
 ## Condiciones medibles (obligatorias antes de Deploy)
-1. **Respaldo verificado:** lista completa de paquetes (incluidos los deshabilitados), launcher por defecto actual, versión de Android/build y ajustes clave, guardados en `backups/tv-santiago/AAAA-MM-DD/`.
-2. **Restauración probada:** el script de restauración devuelve TV Santiago al launcher de Google TV, comprobado en el dispositivo **antes** de dejar fijo el launcher propio.
+1. **Respaldo verificado:** lista completa de paquetes (incluidos los deshabilitados), launcher por defecto actual, versión de Android/build y ajustes clave, guardados en `backups/tv/AAAA-MM-DD/`.
+2. **Restauración probada:** el script de restauración devuelve la TV al launcher de Google TV, comprobado en el dispositivo **antes** de dejar fijo el launcher propio.
 3. **Solo cambios reversibles:** ningún `uninstall` de paquetes del sistema; solo `install` de nuestra app y `disable-user` / `enable` del launcher de stock.
 4. **Rescate documentado:** comando de un solo paso en el runbook para volver al estado original desde el PC.
 
@@ -55,8 +55,8 @@ MVP en pocas sesiones de trabajo. Depende del alcance que salga de Requerimiento
 
 | # | Riesgo | Impacto | Probabilidad | Mitigación / qué debe resolver el Arquitecto |
 |---|---|---|---|---|
-| 6 | **Recomendaciones:** Android TV guarda las recomendaciones de cada app en su proveedor de canales; leer las de *otras* apps exige un permiso reservado al sistema. Un launcher instalado por ADB puede no tener acceso. | Alto: HU-010 podría no cumplirse tal cual | Media-alta | Verificar en TV Santiago qué permisos se pueden conceder por ADB y qué expone el sistema. Alternativas a evaluar: recomendaciones parciales (solo las que el sistema deje leer), fila "Seguir viendo" del sistema, o mostrar la vista de la propia app |
+| 6 | **Recomendaciones:** Android TV guarda las recomendaciones de cada app en su proveedor de canales; leer las de *otras* apps exige un permiso reservado al sistema. Un launcher instalado por ADB puede no tener acceso. | Alto: HU-010 podría no cumplirse tal cual | Media-alta | Verificar en la TV qué permisos se pueden conceder por ADB y qué expone el sistema. Alternativas a evaluar: recomendaciones parciales (solo las que el sistema deje leer), fila "Seguir viendo" del sistema, o mostrar la vista de la propia app |
 | 7 | **Perfiles y notificaciones viven dentro del launcher de Google TV.** Si se deshabilita (plan original para el botón Home), el selector de perfiles y el panel de notificaciones pueden dejar de funcionar | Alto: rompe HU-012 / HU-013 | Alta | El Arquitecto compara: (a) deshabilitar el launcher de stock, (b) **no** deshabilitarlo y capturar el botón Home con un servicio de accesibilidad (técnica usada por launchers como Projectivy), (c) híbrido. La opción elegida queda en ADR-001 |
 
 **Condición nueva (antes de Construcción):**
-5. **Prueba de concepto en TV Santiago** que confirme: qué recomendaciones se pueden leer, cómo se abren perfiles y notificaciones, y cómo se toma el botón Home sin romperlos. Si una historia Must resulta imposible, se escala al usuario con 2–3 opciones antes de construir.
+5. **Prueba de concepto en la TV** que confirme: qué recomendaciones se pueden leer, cómo se abren perfiles y notificaciones, y cómo se toma el botón Home sin romperlos. Si una historia Must resulta imposible, se escala al usuario con 2–3 opciones antes de construir.
