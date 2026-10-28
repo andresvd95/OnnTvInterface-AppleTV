@@ -1,4 +1,4 @@
-﻿# Instala o actualiza ONN Launcher en TV Santiago y lo deja activo (HU-003, HU-010, HU-013).
+﻿# Instala o actualiza ONN Launcher en la TV y lo deja activo (HU-003, HU-010, HU-013).
 param([string]$Apk = (Join-Path $PSScriptRoot "..\app\build\outputs\apk\debug\app-debug.apk"))
 . (Join-Path $PSScriptRoot "_comun.ps1")
 if (-not (Test-Path $Apk)) { throw "No existe el APK: $Apk" }

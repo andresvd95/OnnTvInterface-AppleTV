@@ -1,10 +1,10 @@
 # Informe de la prueba de concepto (condición 5 de viabilidad)
 
-**Fecha:** 2026-10-26 · **Dispositivo:** TV Santiago (onn. 4K, Android 14 / SDK 34) · **App:** poc/ (desechable, dev.onn.poc)
+**Fecha:** 2026-10-26 · **Dispositivo:** La TV (onn. 4K, Android 14 / SDK 34) · **App:** poc/ (desechable, dev.onn.poc)
 
 | # | Pregunta | Resultado | Evidencia |
 |---|---|---|---|
-| 1 | Versión y launcher de stock | Android 14 (SDK 34); HOME = com.google.android.apps.tv.launcherx/.home.HomeActivity | backups/tv-santiago/2026-10-26 |
+| 1 | Versión y launcher de stock | Android 14 (SDK 34); HOME = com.google.android.apps.tv.launcherx/.home.HomeActivity | backups/tv/2026-10-26 |
 | 2 | Recomendaciones de otras apps (HU-010) | ❌ **No accesibles.** READ_EPG_DATA es normal y se concede, pero canales, programas de vista previa y "Seguir viendo" devuelven 0 filas: leer los de otras apps exige ACCESS_ALL_EPG_DATA (signature, solo sistema) | log ONNPOC: channels {}, preview_programs {}, watch_next {} |
 | 3a | Perfiles (HU-012) | ✅ Se abre el selector "Elige una cuenta" de Google TV con un intent directo a launcherx ProfileChooserActivity | captura profiles.png |
 | 3b | Notificaciones (HU-013) | ⚠️ El intent estándar OPEN_NOTIFICATION_HANDLER_PANEL está **prohibido** (requiere STATUS_BAR_SERVICE). ✅ Funciona con el servicio de accesibilidad: performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS) abre el panel de Google TV | captura notif-a11y.png |
@@ -36,7 +36,7 @@
 
 ## Restauración (condición 2) · ✅ probada
 Comandos: `settings delete secure enabled_accessibility_services` · `settings put secure accessibility_enabled 0` · `uninstall dev.onn.poc`.
-Resultado (`backups/tv-santiago/2026-10-26/verificacion-restauracion.txt`): HOME = launcherx, accesibilidad 0/null, deshabilitados = solo com.netflix.ninja, **0 diferencias de paquetes** frente al respaldo.
+Resultado (`backups/tv/2026-10-26/verificacion-restauracion.txt`): HOME = launcherx, accesibilidad 0/null, deshabilitados = solo com.netflix.ninja, **0 diferencias de paquetes** frente al respaldo.
 
 ## Estado de condiciones de viabilidad
 | # | Condición | Estado |

@@ -1,4 +1,4 @@
-# Runbook — ONN LAUNCHER en TV Santiago
+# Runbook — ONN LAUNCHER en la TV
 
 Requisitos: PC en la misma red, ADB en `%LOCALAPPDATA%\Android\platform-tools`, y en la TV **Opciones de desarrollador → Depuración inalámbrica** activada y vinculada con este PC (ver docs/06-poc-informe.md). Los scripts buscan solos el puerto de la TV.
 
@@ -10,7 +10,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
 
 | Situación | Script | Qué hace |
 |---|---|---|
-| Antes de cualquier cambio | `respaldo.ps1` | Guarda paquetes, ajustes e inicio por defecto en `backups/tv-santiago/<fecha>/`. Solo lectura. |
+| Antes de cualquier cambio | `respaldo.ps1` | Guarda paquetes, ajustes e inicio por defecto en `backups/tv/<fecha>/`. Solo lectura. |
 | Instalar o actualizar | `instalar.ps1` | Instala el APK, concede estadísticas de uso, activa el servicio del botón Inicio y abre el launcher. |
 | Tras una actualización de Google TV (vuelve a salir Google TV) | `reaplicar.ps1` | Reactiva el servicio y el permiso. |
 | **RESCATE** / volver al original | `restaurar.ps1` | Quita nuestro servicio de accesibilidad (respeta otros), desinstala ONN Launcher y verifica que Google TV es el inicio. |
@@ -29,7 +29,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
 - Después de instalar, se recomienda **apagar la depuración inalámbrica** en la TV (TDD §8).
 
 ## Advertencia: no forzar el cierre
-`adb shell am force-stop dev.onn.launcher` (o "Forzar detención" en Ajustes) **desactiva el servicio de accesibilidad**: Android lo quita de la lista de servicios activos y el botón Inicio vuelve a abrir Google TV. Si pasa, ejecutar `reaplicar.ps1`. (Visto en TV Santiago, 2026-10-27.)
+`adb shell am force-stop dev.onn.launcher` (o "Forzar detención" en Ajustes) **desactiva el servicio de accesibilidad**: Android lo quita de la lista de servicios activos y el botón Inicio vuelve a abrir Google TV. Si pasa, ejecutar `reaplicar.ps1`. (Visto en la TV, 2026-10-27.)
 
 ## Firma de release y publicación del APK
 1. **Una sola vez:** `powershell -ExecutionPolicy Bypass -File .\scripts\crear-clave-release.ps1`. Crea la clave en `%USERPROFILE%\.onn-keys\onn-launcher-release.jks` y `keystore.properties` (ignorado por git). Contraseña solo ASCII. **Respalda la clave y la contraseña**: sin ellas la TV no acepta actualizaciones sin desinstalar.

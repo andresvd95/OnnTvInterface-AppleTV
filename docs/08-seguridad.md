@@ -14,4 +14,4 @@
 | 8 | Firma del APK | Build debug firmado con clave de depuración local (sin claves en el repo). Para uso doméstico es aceptable; una versión firmada propia queda como mejora | ⚠️ Aceptado |
 | 9 | ADB abierto en la TV | Depuración inalámbrica activa mientras se desarrolla | ⚠️ Recomendado apagarla tras instalar |
 
-**Dictamen:** apto para release v0.1.0 en TV Santiago con los riesgos 8 y 9 aceptados.
+**Dictamen:** apto para release v0.1.0 en la TV con los riesgos 8 y 9 aceptados.

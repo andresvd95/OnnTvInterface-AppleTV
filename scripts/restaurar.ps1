@@ -1,4 +1,4 @@
-﻿# RESCATE / RESTAURACIÓN (HU-005, condición 4): deja TV Santiago como en el respaldo del 2026-10-26.
+﻿# RESCATE / RESTAURACIÓN (HU-005, condición 4): deja la TV como en el respaldo del 2026-10-26.
 # Quita nuestro servicio de accesibilidad, desinstala ONN Launcher y verifica que Google TV vuelve a ser el inicio.
 . (Join-Path $PSScriptRoot "_comun.ps1")
 $s = Connect-Tv
