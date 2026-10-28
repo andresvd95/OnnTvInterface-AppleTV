@@ -2,6 +2,19 @@
 
 Formato basado en Keep a Changelog; versiones SemVer.
 
+## [1.0.0] — 2026-10-27
+### Añadido
+- Distribución tipo app Apple TV: panel lateral de vidrio que se oculta al entrar al contenido, portada de la app con foco con carrusel de Recientes y tarjetas con título y subtítulo (HU-014, HU-015).
+- Barra superior con reloj y accesos rápidos a Wi-Fi, Bluetooth, temporizador de apagado y salida de audio (HU-017).
+- Buscar en el panel cuando la TV lo permite (HU-016).
+- Firma de release con clave propia; APK de release con R8 (~1,6 MB).
+### Cambiado
+- Mover apps se hace en "Mis apps" del panel; el arte de las apps se guarda en memoria para cargar más rápido.
+### Corregido
+- La fila de tarjetas vuelve al inicio cuando reaparece el panel.
+- Script de clave: rutas con caracteres no ASCII en keystore.properties.
+- Release: el build reducido con R8 se cerraba al arrancar (regla para LocalLifecycleOwner).
+- Contraste del reloj y los accesos sobre portadas claras (velo superior).
 ## [0.1.0] — 2026-10-26 — MVP
 ### Añadido
 - Pantalla de inicio: reloj y fecha, cápsula con Notificaciones, Google Play, Ajustes y Perfil (HU-004, HU-007, HU-011, HU-012, HU-013).
