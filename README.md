@@ -12,11 +12,35 @@ Interfaz doméstica para el onn. 4K Streaming Box. Reemplaza las recomendaciones
 ![Stack](https://img.shields.io/badge/stack-Kotlin%20%2B%20Compose_for_TV-7F52FF?style=flat-square)
 ![Privacidad](https://img.shields.io/badge/privacidad-sin_Internet-0F766E?style=flat-square)
 
-[Interfaz](#interfaz) · [Funcionalidades](#funcionalidades) · [Tecnología](#tecnología) · [Uso](#uso) · [Compilación](#compilación) · [Documentación](#documentación)
+<br>
+
+[![Descargar APK](https://img.shields.io/badge/Descargar_APK-%C3%BAltima_versi%C3%B3n-2563EB?style=for-the-badge&logo=android&logoColor=white)](https://github.com/andresvd95/OnnTvInterface-AppleTV/releases/latest/download/onn-launcher.apk)
+
+**[Descargar ONN Launcher (.apk)](https://github.com/andresvd95/OnnTvInterface-AppleTV/releases/latest/download/onn-launcher.apk)** · [Cómo instalarlo en tu TV](#instalar-en-tu-tv-sin-pc) · [Todas las versiones](https://github.com/andresvd95/OnnTvInterface-AppleTV/releases)
+
+[Instalar](#instalar-en-tu-tv-sin-pc) · [Interfaz](#interfaz) · [Funcionalidades](#funcionalidades) · [Tecnología](#tecnología) · [Uso](#uso) · [Compilación](#compilación) · [Documentación](#documentación)
 
 </div>
 
 La interfaz toma como referencia la distribución limpia de Apple TV: panel lateral translúcido, portada de la aplicación seleccionada y una fila de tarjetas. No utiliza recursos, marca ni tipografías de Apple.
+
+## Instalar en tu TV (sin PC)
+
+Funciona en Google TV / Android TV con Android 12 o superior (probado en el onn. 4K Streaming Box).
+
+1. **Instala Downloader** desde Google Play en tu TV (la app naranja de *AFTVnews*).
+2. **Permite instalar apps de Downloader:** *Ajustes → Apps → Seguridad y restricciones → Fuentes desconocidas →* activa **Downloader**.
+3. **Abre Downloader**, escribe esta dirección y pulsa **Ir**:
+   ```
+   github.com/andresvd95/OnnTvInterface-AppleTV/releases/latest/download/onn-launcher.apk
+   ```
+4. Cuando termine la descarga, pulsa **Instalar** y luego **Abrir**.
+5. **Para que el botón Inicio del control abra ONN Launcher:** *Ajustes → Sistema → Accesibilidad →* **ONN Launcher — botón Inicio** → activar.
+6. *(Opcional)* **Para ver la fila de Recientes:** *Ajustes → Apps → Acceso especial de apps → Acceso a datos de uso →* **ONN Launcher** → permitir.
+
+¿Quieres volver a la pantalla de Google TV? Desactiva el paso 5 o desinstala ONN Launcher desde *Ajustes → Apps*. No se modifica nada más de tu TV.
+
+> Si tienes PC, también puedes instalarlo con ADB y los scripts de [docs/runbook.md](docs/runbook.md).
 
 ## Interfaz
 
