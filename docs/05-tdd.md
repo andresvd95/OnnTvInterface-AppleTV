@@ -3,7 +3,7 @@
 > Dueño: `architect` · **Versión:** 0.1 · **Fecha:** 2026-10-26 · **PRD:** [02-prd.md](02-prd.md) v0.2 · **ADR:** [001](adr/ADR-001-stack-kotlin-compose-tv.md), [002](adr/ADR-002-boton-home-hibrido.md)
 
 ## 1. Resumen
-App Android TV en Kotlin + Jetpack Compose for TV que se registra como pantalla de inicio (categorías HOME y LEANBACK_LAUNCHER). Muestra arriba la fila de apps; debajo, las recomendaciones de las apps instaladas; en la barra superior, reloj, fecha y accesos de sistema (Ajustes, Google Play, perfil, notificaciones). El botón Home se toma con un servicio de accesibilidad (ADR-002). Se instala por ADB en TV Santiago con scripts de respaldo, restauración, reaplicación y rescate. Sin cuentas ni servidor.
+App Android TV en Kotlin + Jetpack Compose for TV que se registra como pantalla de inicio (categorías HOME y LEANBACK_LAUNCHER). Muestra arriba la fila de apps; debajo, las recomendaciones de las apps instaladas; en la barra superior, reloj, fecha y accesos de sistema (Ajustes, Google Play, perfil, notificaciones). El botón Home se toma con un servicio de accesibilidad (ADR-002). Se instala por ADB en la TV con scripts de respaldo, restauración, reaplicación y rescate. Sin cuentas ni servidor.
 
 ## 2. Actores y casos de uso
 ```mermaid
@@ -106,11 +106,11 @@ Checklist completo con cybersecurity-engineer antes del release.
 | Nada encima de la fila de apps | Orden fijo de secciones en HomeScreen; un test de UI lo verifica |
 
 ## 10. Prueba de concepto (condición 5) y preguntas abiertas
-La PoC es una app mínima desechable más comandos ADB en TV Santiago, **después del respaldo**. Debe responder:
+La PoC es una app mínima desechable más comandos ADB en la TV, **después del respaldo**. Debe responder:
 1. Versión de Android/Google TV y paquete real del launcher de stock.
 2. ¿Se puede conceder READ_EPG_DATA por ADB? ¿Qué canales, programas y Seguir viendo de otras apps se pueden leer?
 3. Intents que abren el selector de perfiles y el panel de notificaciones, con el launcher de stock activo y deshabilitado.
 4. Servicio de accesibilidad: ¿captura Home? ¿cuánto se nota el parpadeo?
 5. ¿Las imágenes de recomendaciones son URIs locales o URLs? (decide si hace falta permiso de Internet)
 
-**Prerrequisitos:** activar la depuración en TV Santiago (lo haces tú en la TV); instalar en el PC, con tu permiso, platform-tools (ADB), JDK 17 y Android SDK/Gradle.
+**Prerrequisitos:** activar la depuración en la TV (lo haces tú en la TV); instalar en el PC, con tu permiso, platform-tools (ADB), JDK 17 y Android SDK/Gradle.

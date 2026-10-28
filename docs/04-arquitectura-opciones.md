@@ -32,10 +32,10 @@
 | Resistencia a actualizaciones de Google TV | Media (pueden reactivarlo) | Media (pueden cambiar la accesibilidad) | Media |
 | Complejidad | Baja | Media | Media (se prueban las dos en la PoC) |
 
-**Recomendada: Opción C** — se arranca con B, que no rompe perfiles ni notificaciones, y la prueba de concepto en TV Santiago mide el parpadeo. Solo si el parpadeo es inaceptable y A no rompe nada, se pasa a A.
+**Recomendada: Opción C** — se arranca con B, que no rompe perfiles ni notificaciones, y la prueba de concepto en la TV mide el parpadeo. Solo si el parpadeo es inaceptable y A no rompe nada, se pasa a A.
 **Qué perderías con la recomendada:** un poco más de trabajo en la prueba de concepto, porque se prueban las dos vías.
 
 ---
 
 ### Nota sobre recomendaciones (HU-010), aplica a cualquier opción
-Se elija lo que se elija, la prueba de concepto verifica si TV Santiago permite conceder por ADB el permiso de lectura de canales (`READ_EPG_DATA`) y qué recomendaciones de otras apps quedan visibles. Si es muy poco, se escala con opciones antes de construir.
+Se elija lo que se elija, la prueba de concepto verifica si la TV permite conceder por ADB el permiso de lectura de canales (`READ_EPG_DATA`) y qué recomendaciones de otras apps quedan visibles. Si es muy poco, se escala con opciones antes de construir.

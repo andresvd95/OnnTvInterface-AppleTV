@@ -1,7 +1,7 @@
-﻿# Respaldo de solo lectura del estado de TV Santiago (paquetes, ajustes, inicio por defecto). No cambia nada en la TV.
+﻿# Respaldo de solo lectura del estado de la TV (paquetes, ajustes, inicio por defecto). No cambia nada en la TV.
 . (Join-Path $PSScriptRoot "_comun.ps1")
 $s = Connect-Tv
-$d = Join-Path $PSScriptRoot ("..\backups\tv-santiago\" + (Get-Date -Format "yyyy-MM-dd"))
+$d = Join-Path $PSScriptRoot ("..\backups\tv\" + (Get-Date -Format "yyyy-MM-dd"))
 New-Item -ItemType Directory -Force $d | Out-Null
 $cmds = [ordered]@{
   "getprop.txt" = "getprop"; "packages-all.txt" = "pm list packages -f -u --show-versioncode"

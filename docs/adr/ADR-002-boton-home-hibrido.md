@@ -14,7 +14,7 @@ Perfiles (HU-012), notificaciones (HU-013) y quizá las recomendaciones dependen
 | Complejidad | Baja | Media | Media |
 
 ## Decisión
-Se elige **C. Híbrido**: por defecto se aplica **B** (servicio de accesibilidad que detecta que se abrió el launcher de Google TV y trae el nuestro al frente). La PoC mide el parpadeo y prueba **A** en TV Santiago. Se pasa a A **solo si** el parpadeo es inaceptable para el usuario **y** A no rompe perfiles, notificaciones ni recomendaciones. La variante final se anota en este ADR.
+Se elige **C. Híbrido**: por defecto se aplica **B** (servicio de accesibilidad que detecta que se abrió el launcher de Google TV y trae el nuestro al frente). La PoC mide el parpadeo y prueba **A** en la TV. Se pasa a A **solo si** el parpadeo es inaceptable para el usuario **y** A no rompe perfiles, notificaciones ni recomendaciones. La variante final se anota en este ADR.
 
 ## Consecuencias
 - **Positivas:** no se rompe nada de Google TV por defecto; las dos vías se revierten con un comando.
