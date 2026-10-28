@@ -243,7 +243,8 @@ private fun HeroBackground(app: AppEntry?, vm: HomeViewModel, reducedMotion: Boo
             if (a != null) {
                 Image(a.bitmap, null, Modifier.fillMaxSize().blur(HERO_BLUR), contentScale = ContentScale.Crop)
             }
-            // Velos para legibilidad (contraste AA): izquierda y mitad inferior.
+            // Velos para legibilidad (contraste AA): arriba (reloj y accesos), izquierda y mitad inferior.
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Tokens.Colors.background.copy(alpha = 0.8f), 0.3f to Color.Transparent)))
             Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Tokens.Colors.background.copy(alpha = 0.85f), 0.6f to Color.Transparent)))
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.4f to Color.Transparent, 1f to Tokens.Colors.background.copy(alpha = 0.95f))))
         }
