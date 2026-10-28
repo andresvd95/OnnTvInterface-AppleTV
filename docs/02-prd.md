@@ -2,7 +2,7 @@
 
 > Dueño: `requirements-analyst` · Aprobación: usuario (modo semiautomático)
 
-**Versión:** 0.5 · **Fecha:** 2026-10-26 · **Estado:** borrador (v0.5: + HU-017 reloj y accesos rápidos; v0.4: distribución tipo app Apple TV — panel lateral, portada de la app con foco, tarjetas con título; HU-014..016)
+**Versión:** 0.6 · **Fecha:** 2026-10-27 · **Estado:** borrador (v0.6: orden propio de todas las apps, ventana de Recientes (máx. 3), portada "Continuar" con contenido real de las apps y Atrás cierra el panel — HU-018..020; v0.5: + HU-017 reloj y accesos rápidos; v0.4: distribución tipo app Apple TV — panel lateral, portada de la app con foco, tarjetas con título; HU-014..016)
 
 ## 1. Problema y objetivo
 - **Problema:** la interfaz de Google TV en la TV llena la pantalla de recomendaciones y contenido que nadie pidió, y las apps quedan en segundo plano.
@@ -36,6 +36,9 @@
 | Must | HU-015 — Panel lateral de vidrio (perfil, navegación, Mis apps) que se oculta al entrar al contenido |
 | Could | HU-016 — Buscar (abre la búsqueda de Google TV; sujeto a verificación) |
 | Must | HU-017 — Reloj y accesos rápidos arriba: Wi-Fi, Bluetooth, temporizador, salida de audio |
+| Must | HU-018 — Fila de Apps en el orden que elija el usuario (todas las apps se pueden mover) |
+| Must | HU-019 — Ventana pequeña de Recientes debajo de las apps: máximo 3, no se reordena *(reemplaza la fila de HU-010 y el carrusel de Recientes de HU-014)* |
+| Must | HU-020 — Portada premium: la app con foco en grande y, si la app lo expone, su contenido real ("Continuar" con portada y título) |
 | Must | HU-010 — Fila de **Recientes** (apps usadas últimamente) **debajo** de la fila de apps *(reemplaza a las recomendaciones de contenido: la PoC demostró que Android no deja leer las de otras apps; decisión del usuario 2026-10-26)* |
 | Must | HU-011 — Acceso a Google Play (tienda) |
 | Must | HU-012 — Perfiles de Google TV |

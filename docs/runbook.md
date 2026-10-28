@@ -31,6 +31,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\<script>.ps1
 ## Advertencia: no forzar el cierre
 `adb shell am force-stop dev.onn.launcher` (o "Forzar detención" en Ajustes) **desactiva el servicio de accesibilidad**: Android lo quita de la lista de servicios activos y el botón Inicio vuelve a abrir Google TV. Si pasa, ejecutar `reaplicar.ps1`. (Visto en la TV, 2026-10-27.)
 
+## Portada "Continuar" (v1.1.0)
+`instalar.ps1` y `reaplicar.ps1` habilitan el servicio de notificaciones de ONN Launcher (`cmd notification allow_listener dev.onn.launcher/dev.onn.launcher.system.MediaListenerService`); `restaurar.ps1` lo quita. Sin PC: *Ajustes → Apps → Acceso especial de apps → Acceso a notificaciones → ONN Launcher*. Solo lee lo que se reproduce (título e imagen), no las notificaciones.
+
 ## Firma de release y publicación del APK
 1. **Una sola vez:** `powershell -ExecutionPolicy Bypass -File .\scripts\crear-clave-release.ps1`. Crea la clave en `%USERPROFILE%\.onn-keys\onn-launcher-release.jks` y `keystore.properties` (ignorado por git). Contraseña solo ASCII. **Respalda la clave y la contraseña**: sin ellas la TV no acepta actualizaciones sin desinstalar.
 2. Compilar `assembleRelease` (ver notas de build en docs/07-revision-construccion.md). Resultado: `app/build/outputs/apk/release/app-release.apk` (~1,6 MB, con R8).

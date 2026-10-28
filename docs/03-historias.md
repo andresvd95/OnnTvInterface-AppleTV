@@ -133,3 +133,32 @@ Definición de terminado común: criterios probados por QA (tests derivados de e
 6. **Dado** el foco en Audio **cuando** pulso OK **entonces** se abre Pantalla y sonido, donde se elige la salida.
 
 **Casos borde:** si el servicio de accesibilidad está apagado, el temporizador avisa que no puede apagar la TV. Al reiniciar la TV el temporizador se cancela.
+
+## HU-018 — Apps en el orden que yo elija · **Must** *(v0.6, 2026-10-27)*
+**Como** persona de la casa **quiero** ordenar todas las apps de la fila como yo quiera **para** tener primero las que más uso, sin que el uso reciente las cambie de lugar.
+
+1. **Dado** la fila de Apps **cuando** se muestra **entonces** las apps salen en el orden guardado; las que nunca se ordenaron van al final, en orden alfabético.
+2. **Dado** el foco en una app de la fila **cuando** mantengo OK y elijo **Mover** **entonces** con ← / → la app cambia de lugar y con OK (o Atrás) termino; el orden se mantiene después de reiniciar.
+3. **Dado** que abro una app **cuando** vuelvo al inicio **entonces** la fila no cambia de orden.
+
+**Casos borde:** app nueva → al final. App desinstalada → desaparece sin dejar hueco. Quien venía de la v1.0 conserva el orden de sus favoritas como punto de partida.
+
+## HU-019 — Ventana de Recientes (máx. 3) · **Must** *(v0.6; reemplaza la fila de HU-010)*
+**Como** persona de la casa **quiero** ver en una ventana pequeña debajo de las apps las 3 que usé por última vez **para** volver rápido sin que se mezclen con mi orden.
+
+1. **Dado** uso registrado **cuando** se muestra el inicio **entonces** debajo de la fila de Apps aparece una ventana "Recientes" con máximo 3 apps, de la más reciente a la más antigua.
+2. **Dado** el foco en una reciente **cuando** pulso OK **entonces** se abre esa app; con OK mantenido el menú no ofrece Mover (no se reordenan).
+3. **Dado** que no hay uso registrado (o no hay permiso) **cuando** se muestra el inicio **entonces** la ventana no aparece.
+
+## HU-020 — Portada premium con contenido de la app · **Must** *(v0.6)*
+**Como** persona de la casa **quiero** que arriba se vea algo grande y bonito, como en Apple TV, y si se puede lo que estaba viendo en cada app **para** retomar con un clic.
+
+1. **Dado** el foco en una app (fila o Recientes) **cuando** cambia el foco **entonces** la portada muestra esa app: imagen grande a la derecha fundida con el fondo, luz ambiente con su color, nombre en tipografía grande y botón **Abrir**. No rota sola.
+2. **Dado** que una app reprodujo algo (sesión multimedia con título) **cuando** la portada muestra esa app **entonces** se ve "CONTINUAR EN <APP>", el título, el subtítulo (episodio, artista) y su imagen, con botón **Continuar**.
+3. **Dado** que el foco no está en las apps (al abrir el inicio) **cuando** hay contenido reciente **entonces** la portada muestra lo último reproducido; si no, la primera app del orden.
+4. **Dado** contenido de más de 7 días o de una app oculta o desinstalada **cuando** se arma la portada **entonces** no se muestra.
+
+**Límite técnico (verificado en la TV, 2026-10-27):** Android no deja a un launcher de terceros leer los canales, recomendaciones ni "Seguir viendo" de otras apps (permiso ACCESS_ALL_EPG_DATA, solo sistema; ver docs/06-poc-informe.md). Lo único accesible es la **sesión multimedia** de lo que se reproduce, mediante un servicio de notificaciones habilitado. Por eso "Continuar" aparece después de reproducir algo en la app, y solo en las apps que publican título (y a veces imagen) en su sesión. Imágenes con dirección web no se descargan (la app no tiene permiso de Internet).
+
+## Ajuste a HU-015 (v0.6) — Atrás en el panel
+4. **Dado** el panel lateral visible **cuando** pulso Atrás **entonces** el panel se oculta y el foco pasa a la primera app. Con el panel oculto, Atrás lo vuelve a mostrar.

@@ -10,6 +10,11 @@
     <string name="action_settings">Ajustes</string>
     <string name="action_profile">Perfil</string>
     <string name="hero_open">Abrir</string>
+    <string name="hero_continue">Continuar</string>
+    <string name="hero_continue_in">Continuar en %1$s</string>
+    <string name="section_recents">Recientes</string>
+    <string name="menu_move_row_hint">← → para mover, OK para terminar</string>
+    <string name="media_listener_label">ONN Launcher — portada Continuar</string>
     <string name="quick_wifi">Wi-Fi</string>
     <string name="quick_no_network">Sin red</string>
     <string name="quick_bluetooth">Bluetooth</string>

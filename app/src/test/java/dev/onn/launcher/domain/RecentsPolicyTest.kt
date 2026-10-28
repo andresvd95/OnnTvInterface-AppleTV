@@ -28,11 +28,11 @@ class RecentsPolicyTest {
         assertEquals(listOf("yt"), r)
     }
 
-    @Test fun `HU-010 maximo 10 y sin duplicados`() {
+    @Test fun `HU-019 maximo 3 y sin duplicados`() {
         val many = (1..15).map { "app$it" }
         val usage = many.map { u(it, it.removePrefix("app").toLong()) } + u("app15", 1)
         val r = selectRecents(usage, many.toSet(), emptySet())
-        assertEquals(10, r.size)
+        assertEquals(3, r.size)
         assertEquals("app15", r.first())
         assertEquals(r.distinct(), r)
     }

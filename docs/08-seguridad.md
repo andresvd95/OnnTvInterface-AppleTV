@@ -15,3 +15,13 @@
 | 9 | ADB abierto en la TV | Depuración inalámbrica activa mientras se desarrolla | ⚠️ Recomendado apagarla tras instalar |
 
 **Dictamen:** apto para release v0.1.0 en la TV con los riesgos 8 y 9 aceptados.
+
+## v1.1.0 — Portada "Continuar" (HU-020) · 2026-10-27
+| # | Control | Evidencia | Estado |
+|---|---|---|---|
+| 10 | Servicio de notificaciones (`MediaListenerService`) | Protegido por BIND_NOTIFICATION_LISTENER_SERVICE. Solo usa `MediaSessionManager.getActiveSessions` para leer título, subtítulo e imagen de lo que se reproduce. **No** sobrescribe `onNotificationPosted`: no lee ni guarda notificaciones | ✅ |
+| 11 | Datos guardados nuevos | `filesDir/continue/<paquete>.properties` (título, subtítulo, fecha) y `<paquete>.jpg` (imagen, máx. 1280 px). Solo en la TV, `allowBackup=false`, sin red. Se muestran como máximo 7 días | ✅ |
+| 12 | Sin descargas | Imágenes con dirección web se ignoran; solo se leen las incluidas en la sesión o con esquema local (`content`, `android.resource`, `file`) | ✅ |
+| 13 | Reversibilidad | Se habilita con `cmd notification allow_listener` (instalar/reaplicar) y se quita con `disallow_listener` en restaurar.ps1; desinstalar también lo elimina | ✅ |
+
+**Dictamen:** apto para v1.1.0. El acceso a notificaciones es un permiso sensible: se documenta que la app no lee su contenido y el usuario puede negarlo; sin él, la portada muestra solo la app.

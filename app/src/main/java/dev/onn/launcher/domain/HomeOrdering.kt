@@ -1,12 +1,13 @@
 package dev.onn.launcher.domain
 
 /**
- * Orden de la fila de Apps (HU-001, HU-006, HU-008): favoritas primero en su orden guardado,
- * luego el resto en orden alfabetico. Excluye ocultas y el propio launcher.
+ * Orden de la fila de Apps (HU-018): primero las apps en el orden que eligió el usuario,
+ * luego las que aún no tienen lugar (instaladas después) en orden alfabético.
+ * Excluye ocultas (HU-008) y el propio launcher.
  */
 fun orderApps(
     apps: List<AppEntry>,
-    favorites: List<String>,
+    order: List<String>,
     hidden: Set<String>,
     selfPackage: String,
 ): List<AppEntry> {
@@ -14,22 +15,22 @@ fun orderApps(
         .filter { it.packageName != selfPackage && it.packageName !in hidden }
         .distinctBy { it.packageName }
     val byPackage = visible.associateBy { it.packageName }
-    val pinned = favorites.distinct().mapNotNull { byPackage[it] }
-    val pinnedSet = pinned.mapTo(HashSet()) { it.packageName }
+    val placed = order.distinct().mapNotNull { byPackage[it] }
+    val placedSet = placed.mapTo(HashSet()) { it.packageName }
     val rest = visible
-        .filter { it.packageName !in pinnedSet }
+        .filter { it.packageName !in placedSet }
         .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.label })
-    return pinned + rest
+    return placed + rest
 }
 
-/** Mueve una favorita una posicion (delta -1 o +1). Fuera de los bordes no cambia nada. */
-fun moveFavorite(favorites: List<String>, packageName: String, delta: Int): List<String> {
-    val from = favorites.indexOf(packageName)
+/** Mueve un elemento una posición (delta -1 o +1). Fuera de los bordes no cambia nada. */
+fun moveFavorite(list: List<String>, packageName: String, delta: Int): List<String> {
+    val from = list.indexOf(packageName)
     val to = from + delta
-    if (from < 0 || to !in favorites.indices) return favorites
-    return favorites.toMutableList().apply { add(to, removeAt(from)) }
+    if (from < 0 || to !in list.indices) return list
+    return list.toMutableList().apply { add(to, removeAt(from)) }
 }
 
-/** Fija una app arriba (al final de las favoritas) o la quita si ya estaba. */
+/** Fija una app en "Mis apps" (al final) o la quita si ya estaba. */
 fun toggleFavorite(favorites: List<String>, packageName: String): List<String> =
     if (packageName in favorites) favorites - packageName else favorites + packageName

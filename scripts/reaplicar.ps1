@@ -3,4 +3,5 @@
 $s = Connect-Tv
 Invoke-Tv $s "appops set $Script:Pkg GET_USAGE_STATS allow" | Out-Null
 Add-OurA11y $s
+Invoke-Tv $s "cmd notification allow_listener $Script:MediaListener" | Out-Null
 Write-Host "Reaplicado."

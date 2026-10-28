@@ -1,15 +1,51 @@
 package dev.onn.launcher.domain
 
-const val MAX_HERO = 5
+/** "Continuar" guarda contenido como máximo una semana (HU-020). */
+const val MAX_CONTINUE_AGE_MS = 7L * 24 * 60 * 60 * 1000
 
-/** Tarjetas (HU-001 v0.4): primero las recientes, luego el resto de apps, sin duplicados. */
-fun cardOrder(apps: List<AppEntry>, recents: List<AppEntry>): List<AppEntry> =
-    (recents + apps).distinctBy { it.packageName }
+/** Lo último que reprodujo una app, leído de su sesión multimedia (HU-020). */
+data class MediaItem(
+    val packageName: String,
+    val title: String,
+    val subtitle: String?,
+    val artPath: String?,
+    val updatedMs: Long,
+)
 
-/** Apps que rota la portada cuando nadie navega (HU-014). */
-fun heroCandidates(recents: List<AppEntry>): List<AppEntry> = recents.take(MAX_HERO)
+/** Qué muestra la portada (HU-020). */
+sealed interface HeroContent {
+    val app: AppEntry
+    /** Contenido real de la app: portada, título y botón Continuar. */
+    data class Continue(override val app: AppEntry, val media: MediaItem) : HeroContent
+    /** La app en grande, cuando no expone contenido. */
+    data class App(override val app: AppEntry) : HeroContent
+}
 
-fun nextHeroIndex(current: Int, size: Int): Int = if (size <= 0) 0 else (current + 1) % size
+/** Contenido vigente por app: solo apps visibles y de la última semana. */
+fun freshMedia(
+    media: Collection<MediaItem>,
+    visible: Set<String>,
+    nowMs: Long,
+    maxAgeMs: Long = MAX_CONTINUE_AGE_MS,
+): Map<String, MediaItem> = media
+    .filter { it.packageName in visible && nowMs - it.updatedMs <= maxAgeMs }
+    .groupBy { it.packageName }
+    .mapValues { (_, v) -> v.maxBy { it.updatedMs } }
+
+/**
+ * Portada (HU-020): la app con foco; si no hay foco en las apps, lo último reproducido;
+ * si no hay nada reproducido, la primera app del orden del usuario.
+ */
+fun pickHero(focused: AppEntry?, apps: List<AppEntry>, media: Map<String, MediaItem>): HeroContent? {
+    if (focused != null) {
+        return media[focused.packageName]?.let { HeroContent.Continue(focused, it) } ?: HeroContent.App(focused)
+    }
+    val byPackage = apps.associateBy { it.packageName }
+    media.values.sortedByDescending { it.updatedMs }.forEach { m ->
+        byPackage[m.packageName]?.let { return HeroContent.Continue(it, m) }
+    }
+    return apps.firstOrNull()?.let { HeroContent.App(it) }
+}
 
 /** Cuándo se usó una app por última vez, para el subtítulo de portada y tarjetas (HU-014). */
 sealed interface LastUsed {

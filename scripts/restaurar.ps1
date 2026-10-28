@@ -3,6 +3,7 @@
 . (Join-Path $PSScriptRoot "_comun.ps1")
 $s = Connect-Tv
 Remove-OurA11y $s
+Invoke-Tv $s "cmd notification disallow_listener $Script:MediaListener" | Out-Null
 & $Script:Adb -s $s uninstall $Script:Pkg | Out-Null
 Invoke-Tv $s "input keyevent HOME" | Out-Null
 $inicio = (Invoke-Tv $s "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME") -join " "

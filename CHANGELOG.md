@@ -2,6 +2,16 @@
 
 Formato basado en Keep a Changelog; versiones SemVer.
 
+## [1.1.0] — 2026-10-27
+### Añadido
+- Portada premium: la app con foco en grande (imagen a la derecha fundida con el fondo y luz ambiente con su color) y, cuando la app lo expone, su contenido real con **Continuar**: título, episodio o artista e imagen de lo último que reprodujo (HU-020).
+- Ventana de Recientes debajo de las apps, con máximo 3 (HU-019).
+### Cambiado
+- La fila de Apps sigue el orden que elijas: Mover funciona en cualquier app con ← → (HU-018). El uso reciente ya no cambia el orden.
+- La portada ya no rota entre las recientes.
+### Corregido
+- Atrás con el panel lateral abierto lo cierra y lleva a las apps.
+
 ## [1.0.0] — 2026-10-27
 ### Añadido
 - Distribución tipo app Apple TV: panel lateral de vidrio que se oculta al entrar al contenido, portada de la app con foco con carrusel de Recientes y tarjetas con título y subtítulo (HU-014, HU-015).
