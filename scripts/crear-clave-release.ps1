@@ -18,7 +18,7 @@ $sec = Read-Host -AsSecureString "Escribe otra vez la misma contraseña para que
 $plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
 $props = Join-Path $PSScriptRoot "..\keystore.properties"
 @"
-storeFile=$($jks -replace '\\','/')
+storeFile=$([regex]::Replace(($jks -replace '\\','/'), '[^\x00-\x7F]', { param($m) '\u{0:x4}' -f [int][char]$m.Value }))
 storePassword=$plain
 keyAlias=onn-launcher
 keyPassword=$plain
