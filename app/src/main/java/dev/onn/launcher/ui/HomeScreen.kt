@@ -507,7 +507,9 @@ private fun handleRowMoveKey(e: KeyEvent, vm: HomeViewModel): Boolean {
         Key.DirectionLeft -> { if (down) vm.moveBy(-1); true }
         Key.DirectionRight -> { if (down) vm.moveBy(+1); true }
         Key.DirectionUp, Key.DirectionDown -> true
-        Key.DirectionCenter, Key.Enter, Key.NumPadEnter, Key.Back -> { if (!down) vm.endMove(); true }
+        // OK termina con una pulsacion nueva (no con el OK que eligio Mover); Atras al soltar.
+        Key.DirectionCenter, Key.Enter, Key.NumPadEnter -> { if (down && e.nativeKeyEvent.repeatCount == 0) vm.endMove(); true }
+        Key.Back -> { if (!down) vm.endMove(); true }
         else -> false
     }
 }
@@ -736,7 +738,9 @@ private fun handleMoveKey(e: KeyEvent, vm: HomeViewModel): Boolean {
     return when (e.key) {
         Key.DirectionUp -> { if (down) vm.moveBy(-1); true }
         Key.DirectionDown -> { if (down) vm.moveBy(+1); true }
-        Key.DirectionCenter, Key.Enter, Key.NumPadEnter, Key.Back -> { if (!down) vm.endMove(); true }
+        // OK termina con una pulsacion nueva (no con el OK que eligio Mover); Atras al soltar.
+        Key.DirectionCenter, Key.Enter, Key.NumPadEnter -> { if (down && e.nativeKeyEvent.repeatCount == 0) vm.endMove(); true }
+        Key.Back -> { if (!down) vm.endMove(); true }
         else -> false
     }
 }
@@ -752,11 +756,20 @@ private fun AppMenu(
     LaunchedEffect(Unit) { first.requestWhenReady() }
     // Recientes no se reordenan (HU-019): sin "Mover".
     val canMove = target.source != MenuSource.RECENT
+    // El OK que se mantuvo para abrir el menú sigue llegando (repeticiones y al soltar):
+    // se ignora hasta que haya una pulsación nueva de OK.
+    var armed by remember { mutableStateOf(false) }
     Dialog(onDismissRequest = onDismiss) {
         BackHandler(onBack = onDismiss)
         val shape = RoundedCornerShape(Tokens.Radius.md)
         Column(
-            Modifier.width(MENU_WIDTH).background(Tokens.Colors.surfaceStrong, shape).border(1.dp, Tokens.Colors.border, shape).padding(Tokens.Space.s2),
+            Modifier
+                .onPreviewKeyEvent { e ->
+                    val ok = e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter
+                    if (ok && e.type == KeyEventType.KeyDown && e.nativeKeyEvent.repeatCount == 0) armed = true
+                    ok && !armed
+                }
+                .width(MENU_WIDTH).background(Tokens.Colors.surfaceStrong, shape).border(1.dp, Tokens.Colors.border, shape).padding(Tokens.Space.s2),
             verticalArrangement = Arrangement.spacedBy(Tokens.Space.s1),
         ) {
             Text(target.app.label, fontSize = Tokens.Type.md, fontWeight = FontWeight.Medium, color = Tokens.Colors.text, modifier = Modifier.padding(Tokens.Space.s2))
