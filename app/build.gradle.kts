@@ -13,8 +13,8 @@ android {
         applicationId = "dev.onn.launcher"
         minSdk = 31
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "1.0.0"
     }
     // Firma de release: lee keystore.properties (fuera de git). Sin ese archivo, el build de release queda sin firmar.
     val keystoreFile = rootProject.file("keystore.properties")
