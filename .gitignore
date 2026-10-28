@@ -10,3 +10,8 @@ poc/.gradle/
 app/build/
 *.apk
 keystore.properties
+
+# Notas locales con contraseñas o claves: nunca al repo.
+*contraseña*
+*clave*.txt
+*secret*
