@@ -1,9 +1,9 @@
 package dev.onn.launcher.domain
 
-const val MAX_RECENTS = 10
+const val MAX_RECENTS = 3
 
 /**
- * Fila de Recientes (HU-010): de la mas reciente a la mas antigua, solo apps lanzables,
+ * Ventana de Recientes (HU-019): de la mas reciente a la mas antigua, solo apps lanzables,
  * sin excluidas (launcher, Ajustes, ocultas), sin duplicados y como maximo [max].
  */
 fun selectRecents(

@@ -52,5 +52,17 @@
             <meta-data android:name="android.accessibilityservice"
                 android:resource="@xml/home_interceptor" />
         </service>
+
+        <!-- HU-020: portada "Continuar" con lo que reproduce cada app. Se habilita por ADB o en
+             Ajustes > Apps > Acceso especial > Acceso a notificaciones. No lee las notificaciones. -->
+        <service
+            android:name=".system.MediaListenerService"
+            android:exported="true"
+            android:label="@string/media_listener_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

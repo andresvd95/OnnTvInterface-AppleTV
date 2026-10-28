@@ -84,3 +84,16 @@ Pedido del usuario: arriba, un reloj y accesos rápidos a Wi-Fi, Bluetooth, temp
   | Salida de audio | "Audio" | Abre Ajustes → Pantalla y sonido (`DisplaySoundActivity`); el selector rápido de Google TV no es accesible |
 - **Navegación:** ↑ desde Abrir llega a la barra; ←/→ entre accesos; ↓ vuelve a Abrir.
 - **Estados:** temporizador activo resalta la píldora y muestra los minutos restantes; error al abrir → aviso de 3 s.
+
+## v0.4 — Orden propio, ventana de Recientes y portada "Continuar" (HU-018..020) · 2026-10-27
+Pedido del usuario: apps en el orden que él quiera, debajo una ventana pequeña con máximo 3 recientes que no se reordenan, quitar el banner de recientes de arriba y usar una portada más premium tipo Apple TV, con el contenido real de las apps si se puede.
+
+- **Distribución (de arriba abajo):** barra superior (sin cambios) · portada · fila de Apps · ventana de Recientes.
+- **Portada:** fondo a pantalla completa. Imagen nítida (banner de la app o portada del contenido) en el 64 % derecho y 70 % superior, fundida hacia la izquierda y hacia abajo con el fondo; luz ambiente con el color promedio de la imagen. Texto a la izquierda (máx. 380 dp): antetítulo en mayúsculas (`xs`, espaciado 1,5) — "ABIERTA HACE 2 H" o "CONTINUAR EN NETFLIX" —, título (`x3l` para apps, `x2l` y hasta 2 líneas para contenido), subtítulo (`md`) y píldora blanca **▶ Abrir** / **▶ Continuar**. Sin carrusel ni puntos.
+- **Qué muestra:** la última app enfocada en la fila o en Recientes; al volver el panel, lo último reproducido o, si no hay, la primera app del orden.
+- **Fila de Apps:** tarjetas 160×90 con título y "Abierta hace…", en el orden del usuario. En modo Mover la tarjeta lleva borde azul y el texto "← → para mover, OK para terminar".
+- **Ventana de Recientes:** cápsula de vidrio (`surfaceStrong`, borde `border`, radio `md`) con la etiqueta "Recientes" y 3 miniaturas de 96×54. Va debajo de la fila, alineada con el contenido.
+- **Navegación:** ↓ desde la fila va a Recientes; ← en la primera de cada fila abre el panel; Atrás con el panel visible lo cierra y lleva a la primera app.
+
+![Portada con la app enfocada, fila de Apps y Recientes](../media/home-portada.jpg)
+![Mover una app en la fila](../media/mover-app.jpg)

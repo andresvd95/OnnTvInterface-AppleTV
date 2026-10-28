@@ -1,8 +1,11 @@
 package dev.onn.launcher.ui
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -14,14 +17,15 @@ import dev.onn.launcher.data.PreferencesStore
 import dev.onn.launcher.data.RecentsRepository
 import dev.onn.launcher.domain.AppEntry
 import dev.onn.launcher.domain.LastUsed
+import dev.onn.launcher.domain.MediaItem
 import dev.onn.launcher.domain.UsageRecord
-import dev.onn.launcher.domain.cardOrder
-import dev.onn.launcher.domain.heroCandidates
+import dev.onn.launcher.domain.freshMedia
 import dev.onn.launcher.domain.lastUsed
 import dev.onn.launcher.domain.moveFavorite
 import dev.onn.launcher.domain.orderApps
 import dev.onn.launcher.domain.selectRecents
 import dev.onn.launcher.domain.toggleFavorite
+import dev.onn.launcher.system.MediaHub
 import dev.onn.launcher.system.SleepTimer
 import dev.onn.launcher.system.SystemShortcuts
 import kotlinx.coroutines.Dispatchers
@@ -34,20 +38,27 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.roundToInt
 
 data class CardItem(val app: AppEntry, val lastUsed: LastUsed)
 
-/** Imagen de una app ya convertida: banner de TV o icono. */
-data class AppArt(val bitmap: ImageBitmap, val isBanner: Boolean)
+/** Imagen ya convertida (banner, icono o portada de contenido) y su color dominante para la luz ambiente. */
+data class AppArt(val bitmap: ImageBitmap, val isBanner: Boolean, val ambient: Color)
+
+/** App que se está moviendo: en la fila de Apps (HU-018) o en "Mis apps" del panel (HU-006). */
+data class Moving(val packageName: String, val inPanel: Boolean)
 
 data class HomeUiState(
-    val cards: List<CardItem> = emptyList(),
+    val apps: List<CardItem> = emptyList(),
+    val recents: List<CardItem> = emptyList(),
     val pinned: List<AppEntry> = emptyList(),
-    val hero: List<AppEntry> = emptyList(),
     val favorites: List<String> = emptyList(),
-    val moving: String? = null,
+    val media: Map<String, MediaItem> = emptyMap(),
+    val moving: Moving? = null,
     val message: String? = null,
     val canSearch: Boolean = false,
     val online: Boolean = true,
@@ -57,7 +68,8 @@ data class HomeUiState(
 
 enum class Shortcut { SEARCH, NOTIFICATIONS, PLAY, SETTINGS, PROFILE, WIFI, BLUETOOTH, AUDIO }
 
-private data class Extras(val moving: String?, val message: String?, val online: Boolean, val sleepEndAt: Long?)
+private data class Extras(val moving: Moving?, val message: String?, val online: Boolean, val sleepEndAt: Long?)
+private data class Prefs(val order: List<String>, val favorites: List<String>, val hidden: Set<String>)
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
@@ -66,30 +78,36 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val shortcuts = SystemShortcuts(app)
     private val selfPackage = app.packageName
     private val artCache = ConcurrentHashMap<String, AppArt>()
+    private val editLock = Mutex()
 
     private val installed = repo.changes().map { repo.launchableApps() }.flowOn(Dispatchers.IO)
     // Se llena en refreshRecents() (onResume), fuera del hilo principal.
     private val usage = MutableStateFlow<List<UsageRecord>>(emptyList())
-    private val moving = MutableStateFlow<String?>(null)
+    private val moving = MutableStateFlow<Moving?>(null)
     private val message = MutableStateFlow<String?>(null)
     private val online = MutableStateFlow(true)
     private val extras = combine(moving, message, online, SleepTimer.endAt, ::Extras)
+    private val savedPrefs = combine(prefs.order, prefs.favorites, prefs.hidden, ::Prefs)
+
+    init { MediaHub.load(app) }
 
     val state: StateFlow<HomeUiState> = combine(
-        installed, prefs.favorites, prefs.hidden, usage, extras,
-    ) { all, favorites, hidden, usageList, ex ->
-        val visibleHidden = hidden + SYSTEM_SETTINGS
-        val apps = orderApps(all, favorites, visibleHidden, selfPackage)
-        val byPackage = all.associateBy { it.packageName }
-        val excluded = visibleHidden + STOCK_HOME + selfPackage
-        val recents = selectRecents(usageList, byPackage.keys, excluded).mapNotNull { byPackage[it] }
+        installed, savedPrefs, usage, MediaHub.items, extras,
+    ) { all, p, usageList, mediaItems, ex ->
+        val hidden = p.hidden + SYSTEM_SETTINGS
+        // Antes de HU-018 el orden eran las favoritas: se usan como punto de partida.
+        val apps = orderApps(all, p.order.ifEmpty { p.favorites }, hidden, selfPackage)
+        val visible = apps.associateBy { it.packageName }
+        val recents = selectRecents(usageList, visible.keys, hidden + STOCK_HOME + selfPackage).mapNotNull { visible[it] }
         val lastByPkg = usageList.groupBy { it.packageName }.mapValues { (_, v) -> v.maxOf { it.lastUsedMs } }
         val now = System.currentTimeMillis()
+        fun card(a: AppEntry) = CardItem(a, lastUsed(lastByPkg[a.packageName], now))
         HomeUiState(
-            cards = cardOrder(apps, recents).map { CardItem(it, lastUsed(lastByPkg[it.packageName], now)) },
-            pinned = apps.filter { it.packageName in favorites },
-            hero = heroCandidates(recents),
-            favorites = favorites,
+            apps = apps.map(::card),
+            recents = recents.map(::card),
+            pinned = p.favorites.mapNotNull { visible[it] },
+            favorites = p.favorites,
+            media = freshMedia(mediaItems.values, visible.keys, now),
             moving = ex.moving,
             message = ex.message,
             online = ex.online,
@@ -99,7 +117,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    /** Al volver al launcher: Recientes y estado de red (HU-010, HU-017). */
+    /** Al volver al launcher: Recientes y estado de red (HU-019, HU-017). */
     fun refreshRecents() {
         viewModelScope.launch { usage.value = withContext(Dispatchers.IO) { recentsRepo.usage() } }
         online.value = isOnline()
@@ -124,10 +142,32 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     /** Arte de la app, convertido una sola vez y guardado en memoria (rendimiento). */
     suspend fun art(packageName: String): AppArt? = artCache[packageName] ?: withContext(Dispatchers.IO) {
         repo.visual(packageName)?.let { v ->
-            val bmp = if (v.isBanner) v.drawable.toBitmap(BANNER_PX_W, BANNER_PX_H) else v.drawable.toBitmap(ICON_PX, ICON_PX)
-            AppArt(bmp.asImageBitmap(), v.isBanner).also { artCache[packageName] = it }
+            val bmp = if (v.isBanner) {
+                val iw = v.drawable.intrinsicWidth
+                val w = iw.takeIf { it > 0 }?.coerceIn(BANNER_MIN_W, BANNER_MAX_W) ?: BANNER_MIN_W
+                val h = v.drawable.intrinsicHeight.takeIf { it > 0 && iw > 0 }?.let { (it * w / iw.toFloat()).roundToInt() } ?: (w * 9 / 16)
+                v.drawable.toBitmap(w, h)
+            } else {
+                v.drawable.toBitmap(ICON_PX, ICON_PX)
+            }
+            AppArt(bmp.asImageBitmap(), v.isBanner, ambientOf(bmp)).also { artCache[packageName] = it }
         }
     }
+
+    /** Portada del contenido "Continuar" (HU-020), leída del archivo guardado en la TV. */
+    suspend fun mediaArt(item: MediaItem): AppArt? {
+        val path = item.artPath ?: return null
+        val key = "$path@${item.updatedMs}"
+        return artCache[key] ?: withContext(Dispatchers.IO) {
+            runCatching { BitmapFactory.decodeFile(path) }.getOrNull()?.let { bmp ->
+                AppArt(bmp.asImageBitmap(), isBanner = true, ambient = ambientOf(bmp)).also { artCache[key] = it }
+            }
+        }
+    }
+
+    private fun ambientOf(bmp: Bitmap): Color =
+        runCatching { Color(Bitmap.createScaledBitmap(bmp, 1, 1, true).getPixel(0, 0)).copy(alpha = 1f) }
+            .getOrDefault(Tokens.Colors.wallpaperA)
 
     fun launch(app: AppEntry) {
         val intent = repo.launchIntent(app.packageName)
@@ -152,20 +192,25 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun hide(packageName: String) {
         viewModelScope.launch {
-            prefs.hide(packageName)
-            prefs.setFavorites(prefs.favorites.first() - packageName)
+            editLock.withLock {
+                prefs.hide(packageName)
+                prefs.setFavorites(prefs.favorites.first() - packageName)
+            }
         }
     }
 
-    /** Mover (HU-006) en "Mis apps": si la app no esta fijada, se fija primero. */
-    fun startMove(packageName: String) {
-        editFavorites { if (packageName in it) it else it + packageName }
-        moving.value = packageName
+    /**
+     * Mover: en la fila de Apps (HU-018, ← →) o en "Mis apps" (HU-006, ↑ ↓).
+     * En el panel, si la app no está fijada, se fija primero.
+     */
+    fun startMove(packageName: String, inPanel: Boolean) {
+        if (inPanel) editFavorites { if (packageName in it) it else it + packageName }
+        moving.value = Moving(packageName, inPanel)
     }
 
     fun moveBy(delta: Int) {
-        val pkg = moving.value ?: return
-        editFavorites { moveFavorite(it, pkg, delta) }
+        val m = moving.value ?: return
+        if (m.inPanel) editFavorites { moveFavorite(it, m.packageName, delta) } else editOrder { moveFavorite(it, m.packageName, delta) }
     }
 
     fun endMove() { moving.value = null }
@@ -177,14 +222,26 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun editFavorites(change: (List<String>) -> List<String>) {
-        viewModelScope.launch { prefs.setFavorites(change(prefs.favorites.first())) }
+        viewModelScope.launch { editLock.withLock { prefs.setFavorites(change(prefs.favorites.first())) } }
+    }
+
+    /** Edita el orden completo de las apps visibles (las nuevas entran al final, como se ven). */
+    private fun editOrder(change: (List<String>) -> List<String>) {
+        viewModelScope.launch {
+            editLock.withLock {
+                val shown = state.value.apps.map { it.app.packageName }
+                val stored = prefs.order.first().ifEmpty { prefs.favorites.first() }
+                val base = (stored.filter { it in shown } + shown).distinct()
+                prefs.setOrder(change(base))
+            }
+        }
     }
 
     private companion object {
         const val SYSTEM_SETTINGS = "com.android.tv.settings"
         const val STOCK_HOME = "com.google.android.apps.tv.launcherx"
-        const val BANNER_PX_W = 320
-        const val BANNER_PX_H = 180
-        const val ICON_PX = 96
+        const val BANNER_MIN_W = 640
+        const val BANNER_MAX_W = 1280
+        const val ICON_PX = 192
     }
 }

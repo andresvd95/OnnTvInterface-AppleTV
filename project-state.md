@@ -2,7 +2,7 @@
 
 > Memoria viva del proyecto (formato Engram, ver `protocols/memory-engram.md`). **Solo el Orquestador escribe aquí.** Sin secretos. Objetivo: < 200 líneas.
 
-**Última actualización:** 2026-10-26 · **Pack activo:** ninguno (núcleo vedev_agents v0.2.0, copia local en `1 PROYECTOS/VeDev_Agents`)
+**Última actualización:** 2026-10-27 · **Pack activo:** ninguno (núcleo vedev_agents v0.2.0, copia local en `1 PROYECTOS/VeDev_Agents`)
 
 ## 1. Identidad
 - **Qué es:** Interfaz (launcher / pantalla de inicio) propia para Android TV, diseñada a medida para los onn. 4K Streaming Box de la casa.
@@ -88,3 +88,5 @@
 - 2026-10-26 Nueva tarea → **FEATURE**: rediseño con distribución tipo app Apple TV (panel lateral que se oculta, portada de la app con foco con carrusel, tarjetas con título). Rama feature/ui-apple-tv (desde feature/mvp-launcher). Spec UX v0.2 + PRD v0.4 (HU-014..016) esperando aprobación.
 - 2026-10-27 Rediseño Apple TV construido (panel lateral, portada, tarjetas) + HU-017 barra superior (reloj, Wi-Fi, Bluetooth, temporizador propio, audio). 27/27 pruebas. Instalado en la TV; panel y portada verificados con capturas; barra superior pendiente de captura (TV en reposo). Lección: force-stop desactiva el servicio de accesibilidad (runbook).
 - 2026-10-27 v1.0.0: release firmado con clave propia (fuera del repo), R8 1,7 MB. Corregidos en dispositivo: cierre al arrancar por R8 (regla keep), contraste de la barra superior. Instalado en la TV (se reinstaló: firmas distintas).
+
+- 2026-10-27 v1.1.0 (rama feature/orden-y-portada): orden propio de todas las apps (HU-018), ventana de Recientes máx. 3 (HU-019), portada premium con "Continuar" desde la sesión multimedia (HU-020; canales/Seguir viendo siguen bloqueados por permiso de sistema), Atrás cierra el panel. 30/30 pruebas. Instalado en la TV; Atrás y Mover verificados con capturas; "Continuar" pendiente de prueba del usuario reproduciendo algo.

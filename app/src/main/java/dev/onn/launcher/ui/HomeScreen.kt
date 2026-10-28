@@ -31,13 +31,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Home
@@ -46,9 +49,8 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings as SettingsIcon
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Speaker
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.TimerOff
 import androidx.compose.material.icons.outlined.Wifi
@@ -63,7 +65,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -87,6 +88,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Border
@@ -98,9 +100,10 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import dev.onn.launcher.R
 import dev.onn.launcher.domain.AppEntry
+import dev.onn.launcher.domain.HeroContent
 import dev.onn.launcher.domain.LastUsed
 import dev.onn.launcher.domain.SLEEP_OPTIONS_MIN
-import dev.onn.launcher.domain.nextHeroIndex
+import dev.onn.launcher.domain.pickHero
 import dev.onn.launcher.domain.remainingMinutes
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -108,8 +111,9 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Pantalla de inicio v0.2 (docs/ux/pantalla-inicio.md): distribucion tipo app Apple TV.
- * Panel lateral de vidrio que se oculta al entrar al contenido, portada de la app con foco y tarjetas.
+ * Pantalla de inicio v0.4 (docs/ux/pantalla-inicio.md): portada a pantalla completa de la app con foco
+ * (o de lo último reproducido), fila de Apps en el orden del usuario y una ventana pequeña de Recientes.
+ * Panel lateral de vidrio que se oculta al entrar al contenido.
  */
 @Composable
 fun HomeScreen(vm: HomeViewModel) {
@@ -120,68 +124,81 @@ fun HomeScreen(vm: HomeViewModel) {
     }
     var panelVisible by remember { mutableStateOf(true) }
     var panelFocusRequests by remember { mutableIntStateOf(0) }
-    var focusedCard by remember { mutableStateOf<String?>(null) }
-    var cardsHaveFocus by remember { mutableStateOf(false) }
-    var heroIndex by remember { mutableIntStateOf(0) }
+    var heroPkg by remember { mutableStateOf<String?>(null) }
     var menuFor by remember { mutableStateOf<MenuTarget?>(null) }
     var timerOpen by remember { mutableStateOf(false) }
     val homeItem = remember { FocusRequester() }
     val firstCard = remember { FocusRequester() }
     val cardsState = rememberLazyListState()
 
-    // Portada: la tarjeta con foco; si el foco no esta en las tarjetas, el carrusel de Recientes.
-    val heroCard = state.cards.firstOrNull { cardsHaveFocus && it.app.packageName == focusedCard }
-        ?: state.hero.getOrNull(heroIndex)?.let { h -> state.cards.firstOrNull { it.app.packageName == h.packageName } }
-        ?: state.cards.firstOrNull()
+    // Portada (HU-020): la última app enfocada en las filas; sin foco en ellas, lo último reproducido.
+    val focusedApp = heroPkg?.let { p -> (state.apps + state.recents).firstOrNull { it.app.packageName == p } }
+    val hero = pickHero(focusedApp?.app, state.apps.map { it.app }, state.media)
+    val heroCard = hero?.let { h -> state.apps.firstOrNull { it.app.packageName == h.app.packageName } }
 
-    LaunchedEffect(cardsHaveFocus, state.hero.size, reducedMotion) {
-        if (cardsHaveFocus || reducedMotion || state.hero.size < 2) return@LaunchedEffect
-        while (true) {
-            delay(Tokens.Motion.carouselMs)
-            heroIndex = nextHeroIndex(heroIndex, state.hero.size)
-        }
-    }
     // Foco inicial en Inicio (spec v0.2) y cada vez que el panel vuelve.
     LaunchedEffect(state.loaded, panelFocusRequests) { if (state.loaded) homeItem.requestWhenReady() }
 
-    fun showPanel() { panelVisible = true; panelFocusRequests++ }
+    fun showPanel() { panelVisible = true; heroPkg = null; panelFocusRequests++ }
+    fun hidePanel() { panelVisible = false; runCatching { firstCard.requestFocus() } }
     // Al volver el panel, la fila regresa al inicio para que ninguna tarjeta quede debajo.
     LaunchedEffect(panelVisible) { if (panelVisible) cardsState.animateScrollToItem(0) }
-    BackHandler(enabled = !panelVisible && menuFor == null) { showPanel() }
+    // Atrás alterna: con el panel visible lo cierra y pasa a las apps; si no, lo muestra.
+    BackHandler(enabled = menuFor == null && !timerOpen && state.moving == null) {
+        if (panelVisible) hidePanel() else showPanel()
+    }
+    // Al mover en la fila, mantener la app visible.
+    LaunchedEffect(state.moving, state.apps) {
+        val m = state.moving?.takeIf { !it.inPanel } ?: return@LaunchedEffect
+        val i = state.apps.indexOfFirst { it.app.packageName == m.packageName }
+        val visible = cardsState.layoutInfo.visibleItemsInfo.map { it.index }
+        if (i >= 0 && (visible.size < 3 || i <= visible.first() || i >= visible.last())) {
+            cardsState.animateScrollToItem((i - 1).coerceAtLeast(0))
+        }
+    }
 
     val contentStart by animateDpAsState(
         if (panelVisible) Tokens.Space.safeX / 2 + Tokens.Size.panelW + Tokens.Space.s6 else Tokens.Space.safeX,
         tween(if (reducedMotion) 0 else Tokens.Motion.baseMs), label = "contentStart",
     )
+    val onContentFocus = { inside: Boolean -> if (inside) panelVisible = false }
 
     Box(Modifier.fillMaxSize().background(Tokens.Colors.background)) {
-        HeroBackground(heroCard?.app, vm, reducedMotion)
+        val art = rememberHeroArt(hero, vm)
+        HeroBackdrop(art, reducedMotion)
 
         Column(Modifier.fillMaxSize().padding(top = Tokens.Space.safeY, bottom = Tokens.Space.safeY)) {
             TopBar(state, vm, onTimer = { timerOpen = true }, modifier = Modifier.padding(start = contentStart, end = Tokens.Space.safeX))
-            Spacer(Modifier.height(Tokens.Space.s4))
+            Spacer(Modifier.height(Tokens.Space.s6))
             HeroInfo(
-                card = heroCard,
-                vm = vm,
+                hero = hero, card = heroCard,
                 modifier = Modifier.padding(start = contentStart),
-                onOpen = { heroCard?.let { vm.launch(it.app) } ?: vm.open(Shortcut.PLAY, "Google Play") },
+                onOpen = { hero?.let { vm.launch(it.app) } ?: vm.open(Shortcut.PLAY, "Google Play") },
             )
             Spacer(Modifier.weight(1f))
-            if (!cardsHaveFocus && state.hero.size > 1) Dots(state.hero.size, heroIndex, Modifier.padding(start = contentStart))
-            CardsRow(
-                cards = state.cards,
+            AppsRow(
+                cards = state.apps,
+                moving = state.moving?.takeIf { !it.inPanel }?.packageName,
                 listState = cardsState,
                 vm = vm,
                 startPadding = contentStart,
                 firstCard = firstCard,
-                onFocusInside = { inside ->
-                    cardsHaveFocus = inside
-                    if (inside) panelVisible = false
-                },
-                onCardFocused = { focusedCard = it },
+                onFocusInside = onContentFocus,
+                onCardFocused = { heroPkg = it },
                 onLeftFromFirst = { showPanel() },
-                onMenu = { menuFor = MenuTarget(it, fromPanel = false) },
+                onMenu = { menuFor = MenuTarget(it, MenuSource.ROW) },
             )
+            if (state.recents.isNotEmpty()) {
+                Spacer(Modifier.height(Tokens.Space.s2))
+                RecentsWindow(
+                    recents = state.recents, vm = vm,
+                    modifier = Modifier.padding(start = contentStart),
+                    onFocusInside = onContentFocus,
+                    onCardFocused = { heroPkg = it },
+                    onLeftFromFirst = { showPanel() },
+                    onMenu = { menuFor = MenuTarget(it, MenuSource.RECENT) },
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -191,8 +208,8 @@ fun HomeScreen(vm: HomeViewModel) {
         ) {
             SidePanel(
                 state = state, vm = vm, homeItem = homeItem, firstCard = firstCard,
-                onHome = { panelVisible = false; runCatching { firstCard.requestFocus() } },
-                onMenu = { menuFor = MenuTarget(it, fromPanel = true) },
+                onHome = { hidePanel() },
+                onMenu = { menuFor = MenuTarget(it, MenuSource.PANEL) },
             )
         }
 
@@ -209,7 +226,7 @@ fun HomeScreen(vm: HomeViewModel) {
                 target = target,
                 pinned = target.app.packageName in state.favorites,
                 onDismiss = { menuFor = null },
-                onMove = { menuFor = null; vm.startMove(target.app.packageName) },
+                onMove = { menuFor = null; vm.startMove(target.app.packageName, inPanel = target.source == MenuSource.PANEL) },
                 onPin = { menuFor = null; vm.togglePin(target.app.packageName) },
                 onHide = { menuFor = null; vm.hide(target.app.packageName) },
             )
@@ -217,7 +234,8 @@ fun HomeScreen(vm: HomeViewModel) {
     }
 }
 
-private data class MenuTarget(val app: AppEntry, val fromPanel: Boolean)
+private enum class MenuSource { ROW, PANEL, RECENT }
+private data class MenuTarget(val app: AppEntry, val source: MenuSource)
 
 /** Pide el foco y reintenta hasta que el elemento este dibujado. */
 private suspend fun FocusRequester.requestWhenReady() {
@@ -233,48 +251,87 @@ private fun rememberArt(packageName: String?, vm: HomeViewModel): AppArt? {
     return art
 }
 
-// ---------- Portada (HU-014) ----------
-
+/** Arte de la portada: la imagen del contenido si existe; si no, el banner de la app. */
 @Composable
-private fun HeroBackground(app: AppEntry?, vm: HomeViewModel, reducedMotion: Boolean) {
-    val art = rememberArt(app?.packageName, vm)
+private fun rememberHeroArt(hero: HeroContent?, vm: HomeViewModel): AppArt? {
+    val media = (hero as? HeroContent.Continue)?.media
+    val art by produceState<AppArt?>(null, hero?.app?.packageName, media?.artPath, media?.updatedMs) {
+        value = media?.let { vm.mediaArt(it) } ?: hero?.app?.packageName?.let { vm.art(it) }
+    }
+    return art
+}
+
+// ---------- Portada (HU-020) ----------
+
+/** Fondo a pantalla completa: luz ambiente con el color del arte e imagen nítida a la derecha, fundida. */
+@Composable
+private fun HeroBackdrop(art: AppArt?, reducedMotion: Boolean) {
+    val bg = Tokens.Colors.background
     Crossfade(art, animationSpec = tween(if (reducedMotion) 0 else Tokens.Motion.slowMs), label = "hero") { a ->
         Box(Modifier.fillMaxSize()) {
             if (a != null) {
-                Image(a.bitmap, null, Modifier.fillMaxSize().blur(HERO_BLUR), contentScale = ContentScale.Crop)
+                Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0.25f to Color.Transparent, 1f to a.ambient.copy(alpha = AMBIENT_ALPHA))))
+                Box(Modifier.align(Alignment.TopEnd).fillMaxWidth(HERO_ART_W).fillMaxHeight(HERO_ART_H)) {
+                    if (a.isBanner) {
+                        Image(a.bitmap, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    } else {
+                        Image(a.bitmap, null, Modifier.align(Alignment.Center).size(HERO_ICON), contentScale = ContentScale.Fit)
+                    }
+                    Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to bg, 0.45f to bg.copy(alpha = 0.35f), 0.7f to Color.Transparent)))
+                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.5f to Color.Transparent, 1f to bg)))
+                }
             }
-            // Velos para legibilidad (contraste AA): arriba (reloj y accesos), izquierda y mitad inferior.
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Tokens.Colors.background.copy(alpha = 0.8f), 0.3f to Color.Transparent)))
-            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Tokens.Colors.background.copy(alpha = 0.85f), 0.6f to Color.Transparent)))
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.4f to Color.Transparent, 1f to Tokens.Colors.background.copy(alpha = 0.95f))))
+            // Velos de legibilidad (contraste AA): arriba para la barra, abajo para las filas.
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to bg.copy(alpha = 0.75f), 0.2f to Color.Transparent)))
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.5f to Color.Transparent, 0.7f to bg.copy(alpha = 0.92f), 1f to bg)))
         }
     }
 }
 
 @Composable
-private fun HeroInfo(card: CardItem?, vm: HomeViewModel, modifier: Modifier, onOpen: () -> Unit) {
-    val art = rememberArt(card?.app?.packageName, vm)
-    Column(modifier) {
-        Box(
-            Modifier.size(Tokens.Size.heroBannerW, Tokens.Size.heroBannerH)
-                .clip(RoundedCornerShape(Tokens.Radius.md))
-                .background(Tokens.Colors.surface),
-            contentAlignment = Alignment.Center,
-        ) {
-            when {
-                art == null -> Unit
-                art.isBanner -> Image(art.bitmap, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                else -> Image(art.bitmap, null, Modifier.size(Tokens.Size.heroBannerH * 0.6f), contentScale = ContentScale.Fit)
+private fun HeroInfo(hero: HeroContent?, card: CardItem?, modifier: Modifier, onOpen: () -> Unit) {
+    Column(modifier.widthIn(max = HERO_TEXT_W)) {
+        val eyebrow: String
+        val title: String
+        val subtitle: String?
+        val action: String
+        when (hero) {
+            is HeroContent.Continue -> {
+                eyebrow = stringResource(R.string.hero_continue_in, hero.app.label)
+                title = hero.media.title
+                subtitle = hero.media.subtitle
+                action = stringResource(R.string.hero_continue)
+            }
+            is HeroContent.App -> {
+                eyebrow = card?.let { lastUsedText(it.lastUsed) } ?: ""
+                title = hero.app.label
+                subtitle = null
+                action = stringResource(R.string.hero_open)
+            }
+            null -> {
+                eyebrow = ""
+                title = stringResource(R.string.empty_apps)
+                subtitle = null
+                action = stringResource(R.string.action_play)
             }
         }
-        Spacer(Modifier.height(Tokens.Space.s3))
         Text(
-            card?.app?.label ?: stringResource(R.string.empty_apps),
-            fontSize = Tokens.Type.x2l, fontWeight = FontWeight.Medium, color = Tokens.Colors.text,
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            eyebrow.uppercase(), fontSize = Tokens.Type.xs, fontWeight = FontWeight.SemiBold,
+            color = Tokens.Colors.textMuted, letterSpacing = EYEBROW_SPACING, maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
-        if (card != null) Text(lastUsedText(card.lastUsed), fontSize = Tokens.Type.md, color = Tokens.Colors.textMuted)
-        Spacer(Modifier.height(Tokens.Space.s3))
+        Spacer(Modifier.height(Tokens.Space.s2))
+        Text(
+            title,
+            fontSize = if (hero is HeroContent.Continue) Tokens.Type.x2l else Tokens.Type.x3l,
+            lineHeight = if (hero is HeroContent.Continue) 40.sp else 54.sp,
+            fontWeight = FontWeight.Bold, color = Tokens.Colors.text,
+            maxLines = if (hero is HeroContent.Continue) 2 else 1, overflow = TextOverflow.Ellipsis,
+        )
+        if (subtitle != null) {
+            Spacer(Modifier.height(Tokens.Space.s1))
+            Text(subtitle, fontSize = Tokens.Type.md, color = Tokens.Colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        Spacer(Modifier.height(Tokens.Space.s4))
         Surface(
             onClick = onOpen,
             shape = ClickableSurfaceDefaults.shape(CircleShape),
@@ -285,23 +342,14 @@ private fun HeroInfo(card: CardItem?, vm: HomeViewModel, modifier: Modifier, onO
             scale = ClickableSurfaceDefaults.scale(focusedScale = Tokens.Size.focusScale),
             border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(Tokens.Size.focusRing, Tokens.Colors.primary), shape = CircleShape)),
         ) {
-            Text(
-                if (card != null) stringResource(R.string.hero_open) else stringResource(R.string.action_play),
-                fontSize = Tokens.Type.md, fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(horizontal = Tokens.Space.s6, vertical = Tokens.Space.s2),
-            )
-        }
-    }
-}
-
-@Composable
-private fun Dots(count: Int, active: Int, modifier: Modifier) {
-    Row(modifier.padding(bottom = Tokens.Space.s2), horizontalArrangement = Arrangement.spacedBy(Tokens.Space.s1)) {
-        repeat(count) { i ->
-            Box(
-                Modifier.size(if (i == active) DOT_ACTIVE_W else DOT, DOT)
-                    .background(if (i == active) Tokens.Colors.text else Tokens.Colors.textMuted, CircleShape),
-            )
+            Row(
+                Modifier.padding(start = Tokens.Space.s4, end = Tokens.Space.s6, top = Tokens.Space.s2, bottom = Tokens.Space.s2),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(PANEL_ICON_GLYPH))
+                Spacer(Modifier.width(Tokens.Space.s2))
+                Text(action, fontSize = Tokens.Type.md, fontWeight = FontWeight.SemiBold)
+            }
         }
     }
 }
@@ -418,9 +466,11 @@ private fun TimerDialog(activeMinutesLeft: Int, onPick: (Int?) -> Unit, onDismis
     }
 }
 
+// ---------- Fila de Apps en el orden del usuario (HU-018) ----------
+
 @Composable
-private fun CardsRow(
-    cards: List<CardItem>, listState: LazyListState, vm: HomeViewModel, startPadding: Dp, firstCard: FocusRequester,
+private fun AppsRow(
+    cards: List<CardItem>, moving: String?, listState: LazyListState, vm: HomeViewModel, startPadding: Dp, firstCard: FocusRequester,
     onFocusInside: (Boolean) -> Unit, onCardFocused: (String) -> Unit, onLeftFromFirst: () -> Unit,
     onMenu: (AppEntry) -> Unit,
 ) {
@@ -431,14 +481,18 @@ private fun CardsRow(
         contentPadding = PaddingValues(start = startPadding, end = Tokens.Space.safeX, top = Tokens.Space.s3, bottom = Tokens.Space.s1),
     ) {
         itemsIndexed(cards, key = { _, c -> c.app.packageName }) { index, card ->
+            val isMoving = moving == card.app.packageName
             var mod: Modifier = Modifier
-            if (index == 0) {
-                mod = mod.focusRequester(firstCard).onPreviewKeyEvent { e ->
-                    if (e.key == Key.DirectionLeft && e.type == KeyEventType.KeyDown) { onLeftFromFirst(); true } else false
+            if (index == 0) mod = mod.focusRequester(firstCard)
+            mod = mod.onPreviewKeyEvent { e ->
+                when {
+                    isMoving -> handleRowMoveKey(e, vm)
+                    index == 0 && e.key == Key.DirectionLeft && e.type == KeyEventType.KeyDown -> { onLeftFromFirst(); true }
+                    else -> false
                 }
             }
             AppCard(
-                card = card, vm = vm, modifier = mod,
+                card = card, vm = vm, modifier = mod, moving = isMoving,
                 onFocused = { onCardFocused(card.app.packageName) },
                 onClick = { vm.launch(card.app) }, onLongClick = { onMenu(card.app) },
             )
@@ -446,13 +500,28 @@ private fun CardsRow(
     }
 }
 
+/** Modo Mover en la fila (HU-018): ← → reordenan; OK o Atrás terminan. */
+private fun handleRowMoveKey(e: KeyEvent, vm: HomeViewModel): Boolean {
+    val down = e.type == KeyEventType.KeyDown
+    return when (e.key) {
+        Key.DirectionLeft -> { if (down) vm.moveBy(-1); true }
+        Key.DirectionRight -> { if (down) vm.moveBy(+1); true }
+        Key.DirectionUp, Key.DirectionDown -> true
+        // OK termina con una pulsacion nueva (no con el OK que eligio Mover); Atras al soltar.
+        Key.DirectionCenter, Key.Enter, Key.NumPadEnter -> { if (down && e.nativeKeyEvent.repeatCount == 0) vm.endMove(); true }
+        Key.Back -> { if (!down) vm.endMove(); true }
+        else -> false
+    }
+}
+
 @Composable
 private fun AppCard(
-    card: CardItem, vm: HomeViewModel, modifier: Modifier,
+    card: CardItem, vm: HomeViewModel, modifier: Modifier, moving: Boolean,
     onFocused: () -> Unit, onClick: () -> Unit, onLongClick: () -> Unit,
 ) {
     val art = rememberArt(card.app.packageName, vm)
     val shape = RoundedCornerShape(Tokens.Radius.sm)
+    val ring = if (moving) Tokens.Colors.primary else Tokens.Colors.focus
     Column(Modifier.width(Tokens.Size.tileAppW)) {
         Card(
             onClick = onClick,
@@ -464,19 +533,77 @@ private fun AppCard(
             shape = CardDefaults.shape(shape),
             colors = CardDefaults.colors(containerColor = Tokens.Colors.surfaceStrong),
             scale = CardDefaults.scale(focusedScale = Tokens.Size.focusScale),
-            border = CardDefaults.border(focusedBorder = Border(BorderStroke(Tokens.Size.focusRing, Tokens.Colors.focus), shape = shape)),
+            border = CardDefaults.border(
+                border = if (moving) Border(BorderStroke(Tokens.Size.focusRing, Tokens.Colors.primary), shape = shape) else Border.None,
+                focusedBorder = Border(BorderStroke(Tokens.Size.focusRing * 2, ring), shape = shape),
+            ),
         ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                when {
-                    art == null -> Text(card.app.label, fontSize = Tokens.Type.sm, color = Tokens.Colors.text, maxLines = 1)
-                    art.isBanner -> Image(art.bitmap, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    else -> Image(art.bitmap, null, Modifier.size(Tokens.Size.tileAppH * 0.55f), contentScale = ContentScale.Fit)
-                }
-            }
+            ArtBox(art, card.app.label, Tokens.Size.tileAppH)
         }
         Spacer(Modifier.height(Tokens.Space.s3))
-        Text(card.app.label, fontSize = Tokens.Type.sm, color = Tokens.Colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(lastUsedText(card.lastUsed), fontSize = Tokens.Type.xs, color = Tokens.Colors.textMuted, maxLines = 1)
+        if (moving) {
+            Text(stringResource(R.string.menu_move_row_hint), fontSize = Tokens.Type.xs, color = Tokens.Colors.text, maxLines = 2)
+        } else {
+            Text(card.app.label, fontSize = Tokens.Type.sm, color = Tokens.Colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(lastUsedText(card.lastUsed), fontSize = Tokens.Type.xs, color = Tokens.Colors.textMuted, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun ArtBox(art: AppArt?, label: String, height: Dp) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            art == null -> Text(label, fontSize = Tokens.Type.xs, color = Tokens.Colors.text, maxLines = 1)
+            art.isBanner -> Image(art.bitmap, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            else -> Image(art.bitmap, null, Modifier.size(height * 0.55f), contentScale = ContentScale.Fit)
+        }
+    }
+}
+
+// ---------- Ventana de Recientes, máximo 3, sin reordenar (HU-019) ----------
+
+@Composable
+private fun RecentsWindow(
+    recents: List<CardItem>, vm: HomeViewModel, modifier: Modifier,
+    onFocusInside: (Boolean) -> Unit, onCardFocused: (String) -> Unit, onLeftFromFirst: () -> Unit,
+    onMenu: (AppEntry) -> Unit,
+) {
+    val shape = RoundedCornerShape(Tokens.Radius.md)
+    Row(
+        modifier
+            .onFocusChanged { onFocusInside(it.hasFocus) }
+            .background(Tokens.Colors.surfaceStrong, shape)
+            .border(1.dp, Tokens.Colors.border, shape)
+            .padding(horizontal = Tokens.Space.s3, vertical = Tokens.Space.s2),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Tokens.Space.s3),
+    ) {
+        Text(stringResource(R.string.section_recents), fontSize = Tokens.Type.xs, fontWeight = FontWeight.SemiBold, color = Tokens.Colors.textMuted)
+        recents.forEachIndexed { index, card ->
+            val art = rememberArt(card.app.packageName, vm)
+            val tileShape = RoundedCornerShape(Tokens.Radius.sm)
+            var mod: Modifier = Modifier
+            if (index == 0) {
+                mod = mod.onPreviewKeyEvent { e ->
+                    if (e.key == Key.DirectionLeft && e.type == KeyEventType.KeyDown) { onLeftFromFirst(); true } else false
+                }
+            }
+            Card(
+                onClick = { vm.launch(card.app) },
+                onLongClick = { onMenu(card.app) },
+                modifier = mod
+                    .size(RECENT_W, RECENT_H)
+                    .onFocusChanged { if (it.isFocused) onCardFocused(card.app.packageName) }
+                    .semantics { contentDescription = card.app.label },
+                shape = CardDefaults.shape(tileShape),
+                colors = CardDefaults.colors(containerColor = Tokens.Colors.surface),
+                scale = CardDefaults.scale(focusedScale = Tokens.Size.focusScale),
+                border = CardDefaults.border(focusedBorder = Border(BorderStroke(Tokens.Size.focusRing, Tokens.Colors.focus), shape = tileShape)),
+            ) {
+                ArtBox(art, card.app.label, RECENT_H)
+            }
+        }
     }
 }
 
@@ -523,7 +650,7 @@ private fun SidePanel(
                 modifier = Modifier.padding(start = Tokens.Space.s2, top = Tokens.Space.s3, bottom = Tokens.Space.s1),
             )
             state.pinned.forEach { app ->
-                val moving = state.moving == app.packageName
+                val moving = state.moving?.let { it.inPanel && it.packageName == app.packageName } == true
                 var mod = toCards
                 if (moving) mod = mod.onPreviewKeyEvent { handleMoveKey(it, vm) }
                 PinnedItem(app, vm, mod, moving, onClick = { vm.launch(app) }, onLongClick = { onMenu(app) })
@@ -611,7 +738,9 @@ private fun handleMoveKey(e: KeyEvent, vm: HomeViewModel): Boolean {
     return when (e.key) {
         Key.DirectionUp -> { if (down) vm.moveBy(-1); true }
         Key.DirectionDown -> { if (down) vm.moveBy(+1); true }
-        Key.DirectionCenter, Key.Enter, Key.NumPadEnter, Key.Back -> { if (!down) vm.endMove(); true }
+        // OK termina con una pulsacion nueva (no con el OK que eligio Mover); Atras al soltar.
+        Key.DirectionCenter, Key.Enter, Key.NumPadEnter -> { if (down && e.nativeKeyEvent.repeatCount == 0) vm.endMove(); true }
+        Key.Back -> { if (!down) vm.endMove(); true }
         else -> false
     }
 }
@@ -625,18 +754,29 @@ private fun AppMenu(
 ) {
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { first.requestWhenReady() }
+    // Recientes no se reordenan (HU-019): sin "Mover".
+    val canMove = target.source != MenuSource.RECENT
+    // El OK que se mantuvo para abrir el menú sigue llegando (repeticiones y al soltar):
+    // se ignora hasta que haya una pulsación nueva de OK.
+    var armed by remember { mutableStateOf(false) }
     Dialog(onDismissRequest = onDismiss) {
         BackHandler(onBack = onDismiss)
         val shape = RoundedCornerShape(Tokens.Radius.md)
         Column(
-            Modifier.width(MENU_WIDTH).background(Tokens.Colors.surfaceStrong, shape).border(1.dp, Tokens.Colors.border, shape).padding(Tokens.Space.s2),
+            Modifier
+                .onPreviewKeyEvent { e ->
+                    val ok = e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter
+                    if (ok && e.type == KeyEventType.KeyDown && e.nativeKeyEvent.repeatCount == 0) armed = true
+                    ok && !armed
+                }
+                .width(MENU_WIDTH).background(Tokens.Colors.surfaceStrong, shape).border(1.dp, Tokens.Colors.border, shape).padding(Tokens.Space.s2),
             verticalArrangement = Arrangement.spacedBy(Tokens.Space.s1),
         ) {
             Text(target.app.label, fontSize = Tokens.Type.md, fontWeight = FontWeight.Medium, color = Tokens.Colors.text, modifier = Modifier.padding(Tokens.Space.s2))
-            if (target.fromPanel) MenuItem(Icons.Outlined.Edit, stringResource(R.string.menu_move), Modifier.focusRequester(first), onMove)
+            if (canMove) MenuItem(Icons.Outlined.Edit, stringResource(R.string.menu_move), Modifier.focusRequester(first), onMove)
             MenuItem(
                 Icons.Outlined.Star, stringResource(if (pinned) R.string.menu_unpin else R.string.menu_pin),
-                if (target.fromPanel) Modifier else Modifier.focusRequester(first), onPin,
+                if (canMove) Modifier else Modifier.focusRequester(first), onPin,
             )
             MenuItem(Icons.Outlined.Close, stringResource(R.string.menu_hide), Modifier, onHide)
         }
@@ -678,9 +818,14 @@ private fun MessageToast(text: String, onDone: () -> Unit) {
 private const val FOCUS_ATTEMPTS = 20
 private const val FOCUS_RETRY_MS = 50L
 private const val TIMER_TICK_MS = 30_000L
-private val HERO_BLUR = 40.dp
-private val DOT = 6.dp
-private val DOT_ACTIVE_W = 16.dp
+private const val HERO_ART_W = 0.64f
+private const val HERO_ART_H = 0.7f
+private const val AMBIENT_ALPHA = 0.45f
+private val HERO_ICON = 160.dp
+private val HERO_TEXT_W = 380.dp
+private val EYEBROW_SPACING = 1.5.sp
+private val RECENT_W = 96.dp
+private val RECENT_H = 54.dp
 private val PANEL_ICON = 24.dp
 private val PANEL_ICON_GLYPH = 18.dp
 private val MENU_WIDTH = 280.dp

@@ -5,6 +5,8 @@ $Script:TvIp = "192.168.1.8"
 $Script:Pkg = "dev.onn.launcher"
 $Script:A11y = "dev.onn.launcher/dev.onn.launcher.system.HomeInterceptorService"
 $Script:StockHome = "com.google.android.apps.tv.launcherx"
+# HU-020: portada "Continuar" (lee la sesion multimedia de las apps; no lee notificaciones).
+$Script:MediaListener = "dev.onn.launcher/dev.onn.launcher.system.MediaListenerService"
 
 function Connect-Tv {
     if (-not (Test-Path $Script:Adb)) { throw "No se encontró ADB en $Script:Adb" }
