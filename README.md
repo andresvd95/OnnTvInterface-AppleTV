@@ -22,7 +22,7 @@ Interfaz doméstica para el onn. 4K Streaming Box. Reemplaza las recomendaciones
 
 </div>
 
-La interfaz toma como referencia la distribución limpia de Apple TV: panel lateral translúcido, portada de la aplicación seleccionada y una fila de tarjetas. No utiliza recursos, marca ni tipografías de Apple.
+La interfaz toma como referencia la distribución limpia de Apple TV: panel lateral translúcido, portada grande de la aplicación seleccionada, tus apps en el orden que elijas y una ventana con las 3 recientes. No utiliza recursos, marca ni tipografías de Apple.
 
 ## Instalar en tu TV (sin PC)
 
@@ -55,7 +55,11 @@ La portada muestra en grande la app con foco. Si la app expone lo que reprodujis
 
 La navegación se realiza por completo con D-pad, OK, Atrás y Home. El foco se indica mediante escala y un anillo visible.
 
-![Portada de Disney Plus con tarjeta enfocada](docs/media/home-disney-plus.jpg)
+### Ordenar tus apps
+
+Mantén OK sobre una app y elige **Mover**. Usa ← → para cambiarla de lugar y OK para terminar. El orden se guarda y no cambia aunque uses otras apps.
+
+![Mover una app en la fila](docs/media/mover-app.jpg)
 
 ### Reloj y accesos rápidos
 
@@ -74,8 +78,6 @@ El temporizador pone la TV en reposo después de 15, 30, 60, 90 o 120 minutos y 
 - Portada premium con la app enfocada y, cuando la app lo permite, **Continuar** con lo último que reprodujiste.
 - Panel lateral con Perfil, Buscar, Inicio, Notificaciones, Google Play, Ajustes y aplicaciones fijadas.
 - Mantener OK sobre una app para moverla, fijarla en Mis apps u ocultarla.
-
-![Mover una app en la fila](docs/media/mover-app.jpg)
 - Accesos a las funciones nativas de Google TV: perfiles, notificaciones, Play Store y ajustes.
 - El botón Home se intercepta mediante un servicio de accesibilidad sin desactivar Google TV.
 - Respeta la opción del sistema para reducir animaciones.
@@ -86,7 +88,8 @@ El temporizador pone la TV en reposo después de 15, 30, 60, 90 o 120 minutos y 
 - Kotlin y Jetpack Compose for TV
 - Android SDK 34, mínimo Android 12 (API 31)
 - DataStore para preferencias locales
-- UsageStats para ordenar aplicaciones recientes
+- UsageStats para la ventana de Recientes
+- MediaSession (vía acceso a notificaciones) para la portada **Continuar**, sin descargar nada de Internet
 - Sin permisos de Internet, cuentas propias ni recolección de datos
 
 ## Uso
@@ -111,6 +114,7 @@ El proyecto se compila con Gradle. En Windows, la ruta de este repositorio conti
 | Prueba de concepto | [docs/06-poc-informe.md](docs/06-poc-informe.md) |
 | Revisión y QA | [docs/07-revision-construccion.md](docs/07-revision-construccion.md) |
 | Seguridad | [docs/08-seguridad.md](docs/08-seguridad.md) |
+| Cambios por versión | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Estado
 

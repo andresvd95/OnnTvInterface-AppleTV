@@ -11,6 +11,7 @@ Formato basado en Keep a Changelog; versiones SemVer.
 - La portada ya no rota entre las recientes.
 ### Corregido
 - Atrás con el panel lateral abierto lo cierra y lleva a las apps.
+- Mantener OK ya no cierra el menú ni activa Mover antes de elegir.
 
 ## [1.0.0] — 2026-10-27
 ### Añadido
